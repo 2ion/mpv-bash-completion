@@ -54,7 +54,7 @@ readonly template_footer='
     return
   fi
   compopt -o filenames -o default
-  COMPREPLY=($(compgen -- "$cur"))
+  _filedir
 }
 complete -o nospace -F _mpv mpv
 if [[ -n $BASH_VERSINFO && $BASH_VERSINFO -eq 3 ]] ; then
@@ -85,7 +85,7 @@ ensure_float_suffix(){
 }
 
 ####################################################
-# Process options and check deps
+# Process options
 ####################################################
 
 while getopts ":h" opt ; do
@@ -104,13 +104,6 @@ Options:
       exit 1
       ;;
   esac
-done
-
-for dep in mpv sed grep tail cut tr ; do
-  if ! type "$dep" &>/dev/null ; then
-    echo "Error: required command $dep not found in PATH. Abort." >&2
-    exit 1
-  fi
 done
 
 ####################################################
