@@ -54,7 +54,7 @@ readonly template_footer='
     return
   fi
   compopt -o filenames -o default
-  COMPREPLY=($(compgen -- "$cur"))
+  _filedir
 }
 complete -o nospace -F _mpv mpv
 if [[ -n $BASH_VERSINFO && $BASH_VERSINFO -eq 3 ]] ; then
