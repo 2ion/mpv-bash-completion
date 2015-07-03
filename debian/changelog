@@ -1,0 +1,5 @@
+mpv-bash-completion (0.15-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Jens John <dev@2ion.de>  Sat, 04 Jul 2015 00:12:34 +0200

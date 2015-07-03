@@ -1,2 +1,0 @@
-install:
-	install -m 0755 ./mpv /etc/bash_completion.d
