@@ -27,32 +27,28 @@ Included is support for generating a Debian package.
 * grep
 * GNU core utilities
 * make
-
-For generating the Debian package:
-
-* checkinstall
-
-For actually using the completion:
-
 * Bash 4
 
 ## Generating the Debian package
 
-Run
-```sh
-make deb
+Build the package as explained in the Debian package maintainer manuals.
+
+An easy method is to use my script
+[git2deb](https://github.com/2ion/git2deb). Install all dependencies as
+detailed in the README file and then simply run:
+
 ```
-and answer to any prompts accordingly. You will also be prompted for the
-sudo password. The Debian package will get installed and also saved to
-the current working directory. To remove it later, run
-```sh
-sudo dpkg -r mpv-bash-completion
+git2deb https://github.com/2ion/mpv-bash-completion.git debian
 ```
+
+Obey the prompts. You'll find a readily-built Debian package in your
+current working directory.
 
 ## Out-of-Tree downloads
 
 Scripts for certain mpv versions and corresponding Debian packages are
-available on [Bitbucket](https://bitbucket.org/2ion/mpv-bash-completion/downloads).
+available on
+[Bitbucket](https://bitbucket.org/2ion/mpv-bash-completion/downloads).
 
 Please note that mpv is adding, removing or changing the options of its
 command line interface quite frequently. For any new version of mpv
