@@ -149,7 +149,7 @@ for line in $(mpv --list-options \
         "$(printf "$template_case" "$key" "$tail")")
       ;;
     Flag)
-      if [[ $line =~ \[nocfg\] || $line =~ \[global\] ]] ; then
+      if [[ $line =~ \[nocfg\] || $line =~ \[global\] || $key =~ --no- ]] ; then
         _allkeys="$_allkeys $key"
       else
         _allkeys="$_allkeys ${key}="

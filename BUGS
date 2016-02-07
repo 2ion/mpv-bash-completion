@@ -1,4 +1,0 @@
-- Options of type 'Flag' with no default and no [nocfg] marker are
-  not being completed correctly (exmaple: --no-audio). The completion
-  wrongly suggests to complete them in the format --no-audio=*, but
-  these options do not accept a yes/no flag.
