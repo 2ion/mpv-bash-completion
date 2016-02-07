@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # gen.sh - mpv Bash completion script generator
-# Copyright (C) 2014-2015 Jens Oliver John <dev at 2ion dot de>
+# Copyright (C) 2014-2016 2ion <dev@2ion.de>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,11 +19,6 @@
 # Project homepage: https://github.com/2ion/mpv-bash-completion
 
 set -f
-
-####################################################
-# Immutable globals
-# _* -> templates
-####################################################
 
 readonly regex_float_range='([\-]?[0-9\.]+),to,([\-]?[0-9\.]+)'
 readonly regex_integer_range='([\-]?[0-9]+),to,([\-]?[0-9]+)'
@@ -121,12 +116,20 @@ for line in $(mpv --list-options \
   type=${val%%,*}
   case "$type" in
     Choices*)
-      _allkeys="$_allkeys $key"
+      _allkeys="$_allkeys ${key}="
       tail=${val#*,}
       tail=${tail%%,(*}
       tail=${tail//,/ }
-      _prev_cases=("${_prev_cases[@]}" \
-        "$(printf "$template_case" "$key" "$tail")")
+      tails=($tail)
+      if [[ $val =~ $regex_integer_range ]]; then
+        tails=("${tails[@]}" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}")
+      fi
+      expansions=($(\
+        for t in "${tails[@]}"; do
+          printf "%s=%s " "$key" "$t"
+        done))
+      _cur_flag_cases=("${_cur_flag_cases[@]}" \
+        "$(printf "$template_case" "$key=*" "$(echo "${expansions[@]}")")")
       ;;
     Object)
       _allkeys="$_allkeys $key"
