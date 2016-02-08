@@ -108,6 +108,7 @@ done
 for line in $(mpv --list-options \
   | grep -- -- \
   | sed 's/^\s*//;s/\s\+/,/g;s/,(default.*$//g') ; do
+  echo "$line">&2
   key=${line%%,*}
   if [[ $key =~ \* ]] ; then
     key=${key%%\*}
@@ -115,6 +116,12 @@ for line in $(mpv --list-options \
   val=${line#*,}
   type=${val%%,*}
   case "$type" in
+    String*) # String lists
+      _allkeys="$_allkeys $key="
+      tail=${val#*,}
+      tail=${tail%%,(*}
+      tail=${tail//,/ }
+      ;;
     Choices*)
       _allkeys="$_allkeys ${key}="
       tail=${val#*,}
