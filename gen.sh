@@ -108,7 +108,7 @@ done
 for line in $(mpv --list-options \
   | grep -- -- \
   | sed 's/^\s*//;s/\s\+/,/g;s/,(default.*$//g') ; do
-  echo "$line">&2
+  echo " INPUT $line">&2
   key=${line%%,*}
   if [[ $key =~ \* ]] ; then
     key=${key%%\*}
