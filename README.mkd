@@ -23,9 +23,8 @@ Included is support for generating Arch (PKGBUILD) and Debian
 ## Dependencies
 
 * Bash 4
-* GNU core utilities
+* GNU coreutils
 * grep
-* make
 * mpv (must be in $PATH)
 
 ## Generating the completion script
