@@ -5,7 +5,7 @@
     <title>mpv-bash-completion by 2ion</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
@@ -32,49 +32,70 @@ ranges where applicable,</li>
 <li>Regular file name completion.</li>
 </ul>
 
+<p>It does so by parsing the output of</p>
+
+<pre><code>mpv --list-options
+</code></pre>
+
+<p>directly and should thus work against all recent versions of mpv.</p>
+
+<p>Included is support for generating Arch (PKGBUILD) and Debian
+(checkinstall) packages.</p>
+
 <h2>
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
-
-<p>Besides using the methods below, you can always generate the script manually. See the <a href="https://github.com/2ion/mpv-bash-completion/blob/master/README.mkd">README</a> for instructions.</p>
-
-<p>The completion will work on any system running GNU Bash 4. <strong>Mac OSX users will have to install Bash 4. The default Bash 3 OSX is shipping lacks a required shell built-in.</strong></p>
-
-<p>The script can be built on any system having, besides <strong>mpv</strong>, the following programs available:</p>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h2>
 
 <ul>
-<li>GNU Bash 4 or greater</li>
-<li>GNU coreutils, or BSD alternatives for grep, sed, cut, column, tail</li>
+<li>Bash 4</li>
+<li>GNU coreutils</li>
+<li>grep</li>
+<li>mpv (must be in $PATH)</li>
 </ul>
 
-<h3>
-<a id="arch-linux" class="anchor" href="#arch-linux" aria-hidden="true"><span class="octicon octicon-link"></span></a>Arch Linux</h3>
-
-<p><a href="https://aur.archlinux.org/packages/mpv-bash-completion-git">mpv-bash-completion-git</a> is available in the Arch User Repository and can be built using the <a href="https://wiki.archlinux.org/index.php/Arch_Build_System">ABS</a>. See <a href="https://aur4.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=mpv-bash-completion-git">here</a> for the PKGBUILD.</p>
-
-<h3>
-<a id="debian" class="anchor" href="#debian" aria-hidden="true"><span class="octicon octicon-link"></span></a>Debian</h3>
-
-<p>You can build a package locally by following the instructions <a href="https://github.com/2ion/mpv-bash-completion/blob/debian/README.mkd">on the debian branch</a>.</p>
-
-<p>Pre-built packages are available for download <a href="https://bitbucket.org/2ion/mpv-bash-completion/downloads">here</a>, though they may be obsolete.</p>
-
 <h2>
-<a id="bugs-and-features" class="anchor" href="#bugs-and-features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bugs and Features</h2>
+<a id="generating-the-completion-script" class="anchor" href="#generating-the-completion-script" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Generating the completion script</h2>
 
-<p>You may report problems on the <a href="https://github.com/2ion/mpv-bash-completion/issues">issue tracker</a>.</p>
+<p>You can simply run the generation script in order to obtain a completion
+file. For Debian and Arch Linux, you can build a package which installs
+everything into the right places. Readily built Debian and Arch Linux
+packages are also provided.</p>
 
-<p>There's also a <a href="http://crunchbang.org/forums/viewtopic.php?id=36226">support thread</a> on the #! CrunchBang Linux forums.</p>
+<h3>
+<a id="generic-method" class="anchor" href="#generic-method" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Generic method</h3>
 
-<h2>
-<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+<p>Running</p>
 
-<p>Copyright (C) 2014-2015 Jens John (dev _ 2ion _ de)</p>
+<div class="highlight highlight-source-shell"><pre>./gen.sh <span class="pl-k">&gt;</span> mpv</pre></div>
 
-<p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
+<p>will produce a shell script in the current working directory.
+Source it in your .bashrc or similar like this:</p>
 
-<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</p>
+<div class="highlight highlight-source-shell"><pre><span class="pl-c1">source</span> /bath/to/the/script</pre></div>
 
-<p>You should have received a copy of the GNU General Public License along with this program.  If not, see <a href="http://www.gnu.org/licenses">http://www.gnu.org/licenses</a>.</p>
+<p>re-source your .bashrc:</p>
+
+<div class="highlight highlight-source-shell"><pre><span class="pl-c1">source</span> <span class="pl-smi">$HOME</span>/.bashrc</pre></div>
+
+<p>and you should now have completion for the mpv command.</p>
+
+<h3>
+<a id="building-a-debian-package" class="anchor" href="#building-a-debian-package" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building a Debian package</h3>
+
+<p>Instructions are included in the <strong>debian</strong> branch's README.</p>
+
+<div class="highlight highlight-source-shell"><pre>git checkout debian</pre></div>
+
+<p>and continue reading.</p>
+
+<h3>
+<a id="building-an-arch-linux-package" class="anchor" href="#building-an-arch-linux-package" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building an Arch Linux package</h3>
+
+<p>Instructions are included in the <strong>arch</strong> branch's README.</p>
+
+<pre><code>git checkout arch
+</code></pre>
+
+<p>and continue reading.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/2ion/mpv-bash-completion">mpv-bash-completion</a> is maintained by <a href="https://github.com/2ion">2ion</a>.</span>
@@ -84,17 +105,6 @@ ranges where applicable,</li>
 
     </section>
 
-            <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-53661859-3");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
-
+  
   </body>
 </html>
-
