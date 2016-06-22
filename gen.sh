@@ -105,7 +105,7 @@ done
 # main()
 ####################################################
 
-for line in $(mpv --list-options \
+for line in $(mpv --no-config --list-options \
   | grep -- -- \
   | sed 's/^\s*//;s/\s\+/,/g;s/,(default.*$//g') ; do
   echo " INPUT $line">&2
@@ -141,7 +141,7 @@ for line in $(mpv --list-options \
     Object)
       _allkeys="$_allkeys $key"
       tail=""
-      for subline in $(mpv "$key" help \
+      for subline in $(mpv --no-config "$key" help \
         | tail -n+2 \
         | grep -v '^$' \
         | sed 's/\s*//g' \
@@ -192,7 +192,7 @@ echo "--------------------------------------------@"
 echo "Completions dependent on the preceeding word@${#_prev_cases[@]}"
 echo "Completions dependent on the current word@${#_cur_flag_cases[@]}"
 echo "Total completions@$(echo $_allkeys | tr ' ' '\n' | wc -l)"
-echo "Total mpv options@$(mpv --list-options | grep '^ --' | wc -l)"
+echo "Total mpv options@$(mpv --no-config --list-options | grep '^ --' | wc -l)"
 echo "--------------------------------------------@"
 } | column -s@ -t >&2
 
