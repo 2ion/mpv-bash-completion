@@ -2,13 +2,27 @@
 
 -- Bash completion generator for the mpv media player
 -- Compatible with Lua 5.{1,2,3}
--- I want a Lua API for querying this kind of stuff.
 
-if _VERSION == "Lua 5.1" then table.unpack = unpack end
+-- Set the following environment variables to pass parameters. Other
+-- ways of interfacing are not supported:
+--
+--    MPV_BASHCOMPGEN_VERBOSE     Enable debug output on stderr
+--    MPV_BASHCOMPGEN_MPV_CMD     mpv binary to use. Defaults to 'mpv',
+--                                using the shell's $PATH.
+--    MPV_BASHCOMPGEN_MPV_VERSION Marker to place in the generated file.
+--                                Normally, this is the mpv version.
 
 local VERBOSE     = not not os.getenv("MPV_BASHCOMPGEN_VERBOSE") or false
 local MPV_CMD     = os.getenv("MPV_BASHCOMPGEN_MPV_CMD") or "mpv"
 local MPV_VERSION = os.getenv("MPV_BASHCOMPGEN_MPV_VERSION")
+
+-----------------------------------------------------------------------
+
+if _VERSION == "Lua 5.1" then table.unpack = unpack end
+
+-----------------------------------------------------------------------
+
+-- Helper functions
 
 local function log(s, ...)
   if VERBOSE then
@@ -16,10 +30,7 @@ local function log(s, ...)
   end
 end
 
-local function basename(s)
-  return s:match("^.-([^/]+)$")
-end
-
+-- Reporting on optionList() result
 local function debug_categories(ot)
   if not VERBOSE then return end
   local lines = {}
@@ -39,6 +50,10 @@ local function debug_categories(ot)
   table.sort(lines)
   table.insert(lines, string.format("======: %d", sum))
   log(table.concat(lines, "\n"))
+end
+
+local function basename(s)
+  return s:match("^.-([^/]+)$")
 end
 
 local function run(cmd, ...)
@@ -303,7 +318,7 @@ fi]],
 
   i("if [[ -n $prev ]]; then case \"$prev\" in")
   i(string.format("%s) _filedir; return;;",
-    mapcator(keys(olist["File"]), function (e)
+    mapcator(keys(olist.File), function (e)
       local o = string.format("--%s", e)
       table.insert(all, o)
       return o
