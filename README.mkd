@@ -18,9 +18,6 @@ mpv --list-options
 directly and should thus work against all recent versions of mpv, though
 the only support version is the current mpv release.
 
-Included is support for generating Arch (PKGBUILD) and Debian
-(checkinstall) packages.
-
 Package building instructions for the following platforms follow:
 
 * Arch Linux
