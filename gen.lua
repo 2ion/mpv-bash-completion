@@ -60,7 +60,7 @@ local function run(cmd, ...)
   local argv = table.concat({...}, " ")
   log("   run: %s %s", cmd, argv)
   return assert(io.popen(
-    string.format("%s " .. argv, MPV_CMD), "r"))
+    string.format("%s " .. argv, cmd), "r"))
 end
 
 local function mpv(...)
