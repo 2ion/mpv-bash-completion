@@ -37,65 +37,58 @@ ranges where applicable,</li>
 <pre><code>mpv --list-options
 </code></pre>
 
-<p>directly and should thus work against all recent versions of mpv.</p>
+<p>directly and should thus work against all recent versions of mpv, though
+the only support version is the current mpv release.</p>
 
 <p>Included is support for generating Arch (PKGBUILD) and Debian
 (checkinstall) packages.</p>
+
+<p>Package building instructions for the following platforms follow:</p>
+
+<ul>
+<li>Arch Linux</li>
+<li>Generic Linux/OSX/Unix</li>
+</ul>
 
 <h2>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h2>
 
 <ul>
-<li>Bash 4</li>
-<li>GNU coreutils</li>
-<li>grep</li>
-<li>mpv (must be in $PATH)</li>
+<li>Bash 4. OS X users must install an up-to-date Bash version using
+homebrew, macports or similar.</li>
+<li>Lua 5.1, 5.2 or 5.3</li>
+<li>mpv</li>
 </ul>
 
 <h2>
-<a id="generating-the-completion-script" class="anchor" href="#generating-the-completion-script" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Generating the completion script</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
 
-<p>You can simply run the generation script in order to obtain a completion
-file. For Debian and Arch Linux, you can build a package which installs
-everything into the right places. Readily built Debian and Arch Linux
-packages are also provided.</p>
+<p>You can just generate the completion script or build a package for one
+of the supported platforms.</p>
 
 <h3>
-<a id="generic-method" class="anchor" href="#generic-method" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Generic method</h3>
+<a id="platform-agnostic-method" class="anchor" href="#platform-agnostic-method" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Platform-agnostic method</h3>
 
-<p>Running</p>
+<p>Just execute</p>
 
-<div class="highlight highlight-source-shell"><pre>./gen.sh <span class="pl-k">&gt;</span> mpv</pre></div>
+<div class="highlight highlight-source-shell"><pre><span class="pl-c"># You may set the following environment variables beforehand:</span>
+<span class="pl-c"># export MPV_BASHCOMPGEN_VERBOSE=1 # verbose debug/progress output</span>
+<span class="pl-c"># export MPV_BASHCOMPGEN_MPV_CMD=mpv # path or command to execute mpv, defaults to 'mpv'</span>
+<span class="pl-c"># export MPV_BASHCOMPGEN_VERBOSE=foo # override version tag in the output file</span>
 
-<p>will produce a shell script in the current working directory.
-Source it in your .bashrc or similar like this:</p>
+./gen.lua <span class="pl-k">&gt;</span> mpv.sh</pre></div>
 
-<div class="highlight highlight-source-shell"><pre><span class="pl-c1">source</span> /bath/to/the/script</pre></div>
-
-<p>re-source your .bashrc:</p>
-
-<div class="highlight highlight-source-shell"><pre><span class="pl-c1">source</span> <span class="pl-smi">$HOME</span>/.bashrc</pre></div>
-
-<p>and you should now have completion for the mpv command.</p>
+<p>and source the resulting file into Bash.</p>
 
 <h3>
-<a id="building-a-debian-package" class="anchor" href="#building-a-debian-package" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building a Debian package</h3>
+<a id="arch-linux" class="anchor" href="#arch-linux" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Arch Linux</h3>
 
-<p>Instructions are included in the <strong>debian</strong> branch's README.</p>
+<p>Install <a href="https://aur.archlinux.org/packages/mpv-bash-completion-git/">mpv-bash-completion-git</a>
+from the AUR. It will install all necessary dependencies and also ships
+a pacman hook which automatically rebuilds the completion file whenever
+you update mpv.</p>
 
-<div class="highlight highlight-source-shell"><pre>git checkout debian</pre></div>
-
-<p>and continue reading.</p>
-
-<h3>
-<a id="building-an-arch-linux-package" class="anchor" href="#building-an-arch-linux-package" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building an Arch Linux package</h3>
-
-<p>Instructions are included in the <strong>arch</strong> branch's README.</p>
-
-<pre><code>git checkout arch
-</code></pre>
-
-<p>and continue reading.</p>
+<p>The PKGBUILD lives on the <code>aur</code> branch.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/2ion/mpv-bash-completion">mpv-bash-completion</a> is maintained by <a href="https://github.com/2ion">2ion</a>.</span>
