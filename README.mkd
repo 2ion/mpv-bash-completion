@@ -20,9 +20,10 @@ the only support version is the current mpv release.
 
 We support build methods for the following platforms:
 
-* [Arch Linux](https://github.com/2ion/mpv-bash-completion#arch-linux)
-* [OSX Homebrew](https://github.com/2ion/mpv-bash-completion#osx-homebrew)
-* [Generic Linux/OSX/Unix](https://github.com/2ion/mpv-bash-completion#platform-agnostic-method)
+* [Arch Linux](#arch-linux)
+* [Debian GNU/Linux](#debian)
+* [OSX Homebrew](#osx-homebrew)
+* [Generic Linux/OSX/Unix](#platform-agnostic-method)
 
 The following platforms are supported by a third party:
 
@@ -61,6 +62,19 @@ a pacman hook which automatically rebuilds the completion file whenever
 you update mpv so it's **not** necessary to install the package every time.
 
 The PKGBUILD lives on the [`aur4`](https://github.com/2ion/mpv-bash-completion/tree/aur4) branch.
+
+### Debian
+
+You can build a package on Debian testing or unstable, or if your mpv's
+version is greater than approximately 0.14. Jessie's version of mpv is
+too old.
+
+```sh
+sudo apt-get install debhelper mpv lua5.3 dpkg-dev git
+git clone https://github.com/2ion/mpv-bash-completion.git
+cd mpv-bash-completion && git checkout debian
+dpkg-buildpackage -us -uc -b # Install the resulting package: dpkg -i $package
+```
 
 ### OSX Homebrew
 
