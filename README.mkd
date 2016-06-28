@@ -55,4 +55,4 @@ from the AUR. It will install all necessary dependencies and also ships
 a pacman hook which automatically rebuilds the completion file whenever
 you update mpv.
 
-The PKGBUILD lives on the `aur` branch.
+The PKGBUILD lives on the `aur4` branch.
