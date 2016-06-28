@@ -54,14 +54,15 @@ and source the resulting file into Bash.
 Install [mpv-bash-completion-git](https://aur.archlinux.org/packages/mpv-bash-completion-git/)
 from the AUR. It will install all necessary dependencies and also ships
 a pacman hook which automatically rebuilds the completion file whenever
-you update mpv.
+you update mpv so it's **not** necessary to install the package every time.
 
 The PKGBUILD lives on the `aur4` branch.
 
 ### OSX Homebrew
 
 You can simply install using the provided formula. You need to reinstall
-every time you upgrade mpv.
+every time you upgrade mpv in order to update the completion function to
+match the current mpv build.
 
 ```sh
 brew tap 2ion/mpv-bash-completion https://github.com/2ion/mpv-bash-completion.git
