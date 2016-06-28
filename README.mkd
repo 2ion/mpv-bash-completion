@@ -24,6 +24,10 @@ We support build methods for the following platforms:
 * [OSX Homebrew](https://github.com/2ion/mpv-bash-completion#osx-homebrew)
 * [Generic Linux/OSX/Unix](https://github.com/2ion/mpv-bash-completion#platform-agnostic-method)
 
+The following platforms are supported by a third party:
+
+* Gentoo Linux, by extension also Funtoo Linux: [app-shells/mpv-bash-completion](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion)
+
 ## Dependencies
 
 * Bash 4. OS X users must install an up-to-date Bash version using
