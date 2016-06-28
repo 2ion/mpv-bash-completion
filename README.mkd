@@ -20,9 +20,9 @@ the only support version is the current mpv release.
 
 We support build methods for the following platforms:
 
-* Arch Linux
-* OSX Homebrew
-* Generic Linux/OSX/Unix
+* [Arch Linux](https://github.com/2ion/mpv-bash-completion#arch-linux)
+* [OSX Homebrew](https://github.com/2ion/mpv-bash-completion#osx-homebrew)
+* [Generic Linux/OSX/Unix](https://github.com/2ion/mpv-bash-completion#platform-agnostic-method)
 
 ## Dependencies
 
