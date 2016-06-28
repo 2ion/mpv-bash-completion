@@ -1,33 +1,34 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>mpv-bash-completion by 2ion</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-dark.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <title>mpv-bash-completion by 2ion</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
+    <header>
+      <div class="inner">
         <h1>mpv-bash-completion</h1>
-        <p>Bash completion for the mpv video player · Linux/BSD/OSX</p>
-        <p class="view"><a href="https://github.com/2ion/mpv-bash-completion">View the Project on GitHub <small>2ion/mpv-bash-completion</small></a></p>
-        <ul>
-          <li><a href="https://github.com/2ion/mpv-bash-completion/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/2ion/mpv-bash-completion/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/2ion/mpv-bash-completion">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <p>A script for generating a Bash completion script for the popular <a href="https://github.com/mpv-player/mpv">mpv
+        <h2>Bash completion for the mpv video player · Linux/BSD/OSX</h2>
+        <a href="https://github.com/2ion/mpv-bash-completion" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p>A script for generating a Bash completion script for the popular <a href="https://github.com/mpv-player/mpv">mpv
 video player</a>.
 It features...</p>
 
@@ -51,9 +52,17 @@ the only support version is the current mpv release.</p>
 <p>We support build methods for the following platforms:</p>
 
 <ul>
-<li><a href="https://github.com/2ion/mpv-bash-completion#arch-linux">Arch Linux</a></li>
-<li><a href="https://github.com/2ion/mpv-bash-completion#osx-homebrew">OSX Homebrew</a></li>
-<li><a href="https://github.com/2ion/mpv-bash-completion#platform-agnostic-method">Generic Linux/OSX/Unix</a></li>
+<li><a href="#arch-linux">Arch Linux</a></li>
+<li><a href="#debian">Debian GNU/Linux</a></li>
+<li><a href="#osx-homebrew">OSX Homebrew</a></li>
+<li><a href="#platform-agnostic-method">Generic Linux/OSX/Unix</a></li>
+</ul>
+
+<p>The following platforms are supported by a third party:</p>
+
+<ul>
+<li>Gentoo Linux, by extension also Funtoo Linux: <a href="https://packages.gentoo.org/packages/app-shells/mpv-bash-completion">app-shells/mpv-bash-completion</a>
+</li>
 </ul>
 
 <h2>
@@ -94,7 +103,19 @@ from the AUR. It will install all necessary dependencies and also ships
 a pacman hook which automatically rebuilds the completion file whenever
 you update mpv so it's <strong>not</strong> necessary to install the package every time.</p>
 
-<p>The PKGBUILD lives on the <code>aur4</code> branch.</p>
+<p>The PKGBUILD lives on the <a href="https://github.com/2ion/mpv-bash-completion/tree/aur4"><code>aur4</code></a> branch.</p>
+
+<h3>
+<a id="debian" class="anchor" href="#debian" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Debian</h3>
+
+<p>You can build a package on Debian testing or unstable, or if your mpv's
+version is greater than approximately 0.14. Jessie's version of mpv is
+too old.</p>
+
+<div class="highlight highlight-source-shell"><pre>sudo apt-get install debhelper mpv lua5.3 dpkg-dev git
+git clone https://github.com/2ion/mpv-bash-completion.git
+<span class="pl-c1">cd</span> mpv-bash-completion <span class="pl-k">&amp;&amp;</span> git checkout debian
+dpkg-buildpackage -us -uc -b <span class="pl-c"># Install the resulting package: dpkg -i $package</span></pre></div>
 
 <h3>
 <a id="osx-homebrew" class="anchor" href="#osx-homebrew" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OSX Homebrew</h3>
@@ -105,13 +126,25 @@ match the current mpv build.</p>
 
 <div class="highlight highlight-source-shell"><pre>brew tap 2ion/mpv-bash-completion https://github.com/2ion/mpv-bash-completion.git
 brew install --HEAD mpv-bash-completion</pre></div>
-      </section>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/2ion/mpv-bash-completion/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/2ion/mpv-bash-completion/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/2ion/mpv-bash-completion"></a> is maintained by <a href="https://github.com/2ion">2ion</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
     </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/2ion">2ion</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
+  
   </body>
 </html>
