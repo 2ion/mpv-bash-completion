@@ -56,15 +56,27 @@ local function basename(s)
   return s:match("^.-([^/]+)$")
 end
 
-local function run(cmd, ...)
+local function run(cmd, softfail, ...)
   local argv = table.concat({...}, " ")
   log("   run: %s %s", cmd, argv)
-  return assert(io.popen(
-    string.format("%s " .. argv, cmd), "r"))
+  if softfail then
+    return io.popen(string.format("%s " .. argv, cmd), "r")
+  else
+    return assert(io.popen(string.format("%s " .. argv, cmd), "r"))
+  end
 end
 
 local function mpv(...)
-  return run(MPV_CMD, "--no-config", ...)
+  return run(MPV_CMD, false, "--no-config", ...)
+end
+
+local function xrandr()
+  local r =  run("xrandr", true)
+  if not r then
+    log("xrandr: failed to run, ignoring")
+    return nil
+  end
+  return r
 end
 
 local function assert_read(h, w)
@@ -154,7 +166,8 @@ local function optionList()
   end
 
   local function getCommonXrandrResList()
-    local h = run("xrandr")
+    local h = xrandr()
+    if not h then return end
     local d = assert_read(h)
     h:close()
     local clist = {}
