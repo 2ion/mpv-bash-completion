@@ -2,7 +2,7 @@ Source: mpv-bash-completion
 Section: video
 Priority: optional
 Maintainer: Jens John <dev@2ion.de>
-Build-Depends: debhelper (>= 9), mpv, coreutils
+Build-Depends: debhelper (>= 9), mpv, lua5.2
 Standards-Version: 3.9.5
 Homepage: https://2ion.github.io/mpv-bash-completion
 Vcs-Git: https://github.com/2ion/mpv-bash-completion.git
@@ -12,8 +12,3 @@ Package: mpv-bash-completion
 Architecture: all
 Depends: mpv, bash-completion, ${misc:Depends}
 Description: Bash completion for the mpv media player
- * Completion for all --options;
- * Type-based completion for --option arguments for choices,
-   flags, integers and floats;
- * Completion for upper/lower bounds for integer- and float-type argument
-   ranges if possible.

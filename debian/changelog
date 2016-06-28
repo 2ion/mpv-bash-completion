@@ -1,4 +1,4 @@
-mpv-bash-completion (0.15-1) unstable; urgency=low
+mpv-bash-completion (3.0~git1-1) unstable; urgency=low
 
   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
 
