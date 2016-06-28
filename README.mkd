@@ -28,7 +28,7 @@ We support build methods for the following platforms:
 
 * Bash 4. OS X users must install an up-to-date Bash version using
   homebrew, macports or similar.
-* Lua 5.1, 5.2 or 5.3
+* Lua 5.1, 5.2 or 5.3 as well as LuaJIT
 * mpv
 
 ## Usage

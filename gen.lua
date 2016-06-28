@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 
 -- Bash completion generator for the mpv media player
--- Compatible with Lua 5.{1,2,3}
+-- Compatible with Lua 5.{1,2,3} and LuaJIT
 
 -- Set the following environment variables to pass parameters. Other
 -- ways of interfacing are not supported:
