@@ -19,7 +19,10 @@
     </section>
 
     <section class="main-content">
-      <p>A script for generating a Bash completion script for the popular <a href="https://github.com/mpv-player/mpv">mpv
+      <h1>
+<a id="mpv-bash-completion" class="anchor" href="#mpv-bash-completion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>mpv-bash-completion</h1>
+
+<p>A script for generating a Bash completion script for the popular <a href="https://github.com/mpv-player/mpv">mpv
 video player</a>.
 It features...</p>
 
@@ -40,13 +43,11 @@ ranges where applicable,</li>
 <p>directly and should thus work against all recent versions of mpv, though
 the only support version is the current mpv release.</p>
 
-<p>Included is support for generating Arch (PKGBUILD) and Debian
-(checkinstall) packages.</p>
-
-<p>Package building instructions for the following platforms follow:</p>
+<p>We support build methods for the following platforms:</p>
 
 <ul>
 <li>Arch Linux</li>
+<li>OSX Homebrew</li>
 <li>Generic Linux/OSX/Unix</li>
 </ul>
 
@@ -86,9 +87,19 @@ of the supported platforms.</p>
 <p>Install <a href="https://aur.archlinux.org/packages/mpv-bash-completion-git/">mpv-bash-completion-git</a>
 from the AUR. It will install all necessary dependencies and also ships
 a pacman hook which automatically rebuilds the completion file whenever
-you update mpv.</p>
+you update mpv so it's <strong>not</strong> necessary to install the package every time.</p>
 
-<p>The PKGBUILD lives on the <code>aur</code> branch.</p>
+<p>The PKGBUILD lives on the <code>aur4</code> branch.</p>
+
+<h3>
+<a id="osx-homebrew" class="anchor" href="#osx-homebrew" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OSX Homebrew</h3>
+
+<p>You can simply install using the provided formula. You need to reinstall
+every time you upgrade mpv in order to update the completion function to
+match the current mpv build.</p>
+
+<div class="highlight highlight-source-shell"><pre>brew tap 2ion/mpv-bash-completion https://github.com/2ion/mpv-bash-completion.git
+brew install --HEAD mpv-bash-completion</pre></div>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/2ion/mpv-bash-completion">mpv-bash-completion</a> is maintained by <a href="https://github.com/2ion">2ion</a>.</span>
