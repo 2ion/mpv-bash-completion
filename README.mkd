@@ -56,7 +56,7 @@ from the AUR. It will install all necessary dependencies and also ships
 a pacman hook which automatically rebuilds the completion file whenever
 you update mpv so it's **not** necessary to install the package every time.
 
-The PKGBUILD lives on the `aur4` branch.
+The PKGBUILD lives on the [`aur4`](https://github.com/2ion/mpv-bash-completion/tree/aur4) branch.
 
 ### OSX Homebrew
 
