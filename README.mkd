@@ -1,5 +1,3 @@
-_(The primary source is hosted on [Github](https://github.com/2ion/mpv-bash-completion), the downloads are on [Bitbucket](https://bitbucket.org/2ion/mpv-bash-completion/downloads))_
-
 # mpv-bash-completion
 
 A script for generating a Bash completion script for the popular [mpv
@@ -17,61 +15,56 @@ It does so by parsing the output of
 ```
 mpv --list-options
 ```
-directly and should thus work against all recent versions of mpv.
+directly and should thus work against all recent versions of mpv, though
+the only support version is the current mpv release.
 
-Included is support for generating a Debian package.
+We support build methods for the following platforms:
+
+* [Arch Linux](https://github.com/2ion/mpv-bash-completion#arch-linux)
+* [OSX Homebrew](https://github.com/2ion/mpv-bash-completion#osx-homebrew)
+* [Generic Linux/OSX/Unix](https://github.com/2ion/mpv-bash-completion#platform-agnostic-method)
 
 ## Dependencies
 
-* mpv (must be in $PATH)
-* grep
-* GNU core utilities
-* make
-* Bash 4
+* Bash 4. OS X users must install an up-to-date Bash version using
+  homebrew, macports or similar.
+* Lua 5.1, 5.2 or 5.3 as well as LuaJIT
+* mpv
 
-## Generating the Debian package
+## Usage
 
-Build the package as explained in the Debian package maintainer manuals.
+You can just generate the completion script or build a package for one
+of the supported platforms.
 
-An easy method is to use my script
-[git2deb](https://github.com/2ion/git2deb). Install all dependencies as
-detailed in the README file and then simply run:
+### Platform-agnostic method
 
+Just execute
+```sh
+# You may set the following environment variables beforehand:
+# export MPV_BASHCOMPGEN_VERBOSE=1 # verbose debug/progress output
+# export MPV_BASHCOMPGEN_MPV_CMD=mpv # path or command to execute mpv, defaults to 'mpv'
+# export MPV_BASHCOMPGEN_VERBOSE=foo # override version tag in the output file
+
+./gen.lua > mpv.sh
 ```
-git2deb https://github.com/2ion/mpv-bash-completion.git debian
+and source the resulting file into Bash.
+
+### Arch Linux
+
+Install [mpv-bash-completion-git](https://aur.archlinux.org/packages/mpv-bash-completion-git/)
+from the AUR. It will install all necessary dependencies and also ships
+a pacman hook which automatically rebuilds the completion file whenever
+you update mpv so it's **not** necessary to install the package every time.
+
+The PKGBUILD lives on the [`aur4`](https://github.com/2ion/mpv-bash-completion/tree/aur4) branch.
+
+### OSX Homebrew
+
+You can simply install using the provided formula. You need to reinstall
+every time you upgrade mpv in order to update the completion function to
+match the current mpv build.
+
+```sh
+brew tap 2ion/mpv-bash-completion https://github.com/2ion/mpv-bash-completion.git
+brew install --HEAD mpv-bash-completion
 ```
-
-Obey the prompts. You'll find a readily-built Debian package in your
-current working directory.
-
-## Out-of-Tree downloads
-
-Scripts for certain mpv versions and corresponding Debian packages are
-available on
-[Bitbucket](https://bitbucket.org/2ion/mpv-bash-completion/downloads).
-
-Please note that mpv is adding, removing or changing the options of its
-command line interface quite frequently. For any new version of mpv
-you're running, I recommend you rebuild the completion script to ensure
-that it's still accurate.
-
-## License
-
-```
-gen.sh - mpv Bash completion script generator - This is a hack. Oh noes!
-Copyright (C) 2014-2015 Jens Oliver John <dev at 2ion dot de>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-```
-
