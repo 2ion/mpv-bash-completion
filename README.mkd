@@ -18,9 +18,10 @@ mpv --list-options
 directly and should thus work against all recent versions of mpv, though
 the only support version is the current mpv release.
 
-Package building instructions for the following platforms follow:
+We support build methods for the following platforms:
 
 * Arch Linux
+* OSX Homebrew
 * Generic Linux/OSX/Unix
 
 ## Dependencies
@@ -56,3 +57,13 @@ a pacman hook which automatically rebuilds the completion file whenever
 you update mpv.
 
 The PKGBUILD lives on the `aur4` branch.
+
+### OSX Homebrew
+
+You can simply install using the provided formula. You need to reinstall
+every time you upgrade mpv.
+
+```sh
+brew tap 2ion/mpv-bash-completion https://github.com/2ion/mpv-bash-completion.git
+brew install --HEAD mpv-bash-completion
+```
