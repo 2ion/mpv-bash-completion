@@ -236,7 +236,7 @@ local function optionList()
                                    ot = "Numeric"
     elseif ot == "Key/value"  then ot = "String"
     elseif ot == "Object"     then clist = expandObject(o)
-    elseif ot == "Output"     then clist = { "no", "fatal", "error", "warn", "info", "status", "v", "debug", "trace" }
+    elseif ot == "Output"     then clist = { "all=no", "all=fatal", "all=error", "all=warn", "all=info", "all=status", "all=v", "all=debug", "all=trace" }
                                    ot = "String"
     elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
                                    ot = "Position"
