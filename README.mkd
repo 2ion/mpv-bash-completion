@@ -65,6 +65,31 @@ The PKGBUILD lives on the [`aur4`](https://github.com/2ion/mpv-bash-completion/t
 
 ### Debian
 
+#### Stable (Jessie)
+
+Install via BunsenLabs. Set up the bunsenlabs-hydrogen repository as
+described [here](https://pkg.bunsenlabs.org/index.html#bunsen-hydrogen),
+then execute:
+
+```sh
+sudo apt-get update && sudo apt-get install mpv-bash-completion
+```
+
+#### Testing + Unstable: Install from a repository
+
+Install from a repository.
+
+```sh
+# Install the signing key
+wget -O- https://pkg.bunsenlabs.org/BunsenLabs-RELEASE.asc | sudo apt-key add -
+# Add the repository
+echo 'deb http://pkg.bunsenlabs.org/debian unstable main' | sudo tee /etc/apt/sources.list.d/bunsenlabs-unstable.list
+# Update & install
+sudo apt-get update && sudo apt-get install mpv-bash-completion
+```
+
+#### mpv git builds / custom package build
+
 You can build a package on Debian testing or unstable, or if your mpv's
 version is greater than approximately 0.14. Jessie's version of mpv is
 too old.
