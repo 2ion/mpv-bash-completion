@@ -1,33 +1,25 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>mpv-bash-completion by 2ion</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-dark.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>mpv-bash-completion</h1>
-        <p>Bash completion for the mpv video player · Linux/BSD/OSX</p>
-        <p class="view"><a href="https://github.com/2ion/mpv-bash-completion">View the Project on GitHub <small>2ion/mpv-bash-completion</small></a></p>
-        <ul>
-          <li><a href="https://github.com/2ion/mpv-bash-completion/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/2ion/mpv-bash-completion/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/2ion/mpv-bash-completion">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <p>A script for generating a Bash completion script for the popular <a href="https://github.com/mpv-player/mpv">mpv
+    <section class="page-header">
+      <h1 class="project-name">mpv-bash-completion</h1>
+      <h2 class="project-tagline">Bash completion for the mpv video player · Linux/BSD/OSX</h2>
+      <a href="https://github.com/2ion/mpv-bash-completion" class="btn">View on GitHub</a>
+      <a href="https://github.com/2ion/mpv-bash-completion/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/2ion/mpv-bash-completion/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p>A script for generating a Bash completion script for the popular <a href="https://github.com/mpv-player/mpv">mpv
 video player</a>.
 It features...</p>
 
@@ -48,7 +40,7 @@ ranges where applicable,</li>
 <p>directly and should thus work against all recent versions of mpv, though
 the only support version is the current mpv release.</p>
 
-<p>We support build methods for the following platforms:</p>
+<p>We support installation methods for the following platforms:</p>
 
 <ul>
 <li><a href="#arch-linux">Arch Linux</a></li>
@@ -64,6 +56,8 @@ the only support version is the current mpv release.</p>
 </li>
 </ul>
 
+<p>See below for details.</p>
+
 <h2>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h2>
 
@@ -75,7 +69,7 @@ homebrew, macports or similar.</li>
 </ul>
 
 <h2>
-<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>You can just generate the completion script or build a package for one
 of the supported platforms.</p>
@@ -107,6 +101,30 @@ you update mpv so it's <strong>not</strong> necessary to install the package eve
 <h3>
 <a id="debian" class="anchor" href="#debian" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Debian</h3>
 
+<h4>
+<a id="stable-jessie" class="anchor" href="#stable-jessie" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stable (Jessie)</h4>
+
+<p>Install via BunsenLabs. Set up the bunsenlabs-hydrogen repository as
+described <a href="https://pkg.bunsenlabs.org/index.html#bunsen-hydrogen">here</a>,
+then execute:</p>
+
+<div class="highlight highlight-source-shell"><pre>sudo apt-get update <span class="pl-k">&amp;&amp;</span> sudo apt-get install mpv-bash-completion</pre></div>
+
+<h4>
+<a id="testing--sid" class="anchor" href="#testing--sid" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Testing &amp; Sid</h4>
+
+<p>Install from a repository.</p>
+
+<div class="highlight highlight-source-shell"><pre><span class="pl-c"># Install the signing key</span>
+wget -O- https://pkg.bunsenlabs.org/BunsenLabs-RELEASE.asc <span class="pl-k">|</span> sudo apt-key add -
+<span class="pl-c"># Add the repository</span>
+<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">'</span>deb http://pkg.bunsenlabs.org/debian unstable main<span class="pl-pds">'</span></span> <span class="pl-k">|</span> sudo tee /etc/apt/sources.list.d/bunsenlabs-unstable.list
+<span class="pl-c"># Update &amp; install</span>
+sudo apt-get update <span class="pl-k">&amp;&amp;</span> sudo apt-get install mpv-bash-completion</pre></div>
+
+<h4>
+<a id="mpv-git-builds--custom-package-build" class="anchor" href="#mpv-git-builds--custom-package-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>mpv git builds / custom package build</h4>
+
 <p>You can build a package on Debian testing or unstable, or if your mpv's
 version is greater than approximately 0.14. Jessie's version of mpv is
 too old.</p>
@@ -125,13 +143,15 @@ match the current mpv build.</p>
 
 <div class="highlight highlight-source-shell"><pre>brew tap 2ion/mpv-bash-completion https://github.com/2ion/mpv-bash-completion.git
 brew install --HEAD mpv-bash-completion</pre></div>
-      </section>
-    </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/2ion">2ion</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/2ion/mpv-bash-completion">mpv-bash-completion</a> is maintained by <a href="https://github.com/2ion">2ion</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
   </body>
 </html>
