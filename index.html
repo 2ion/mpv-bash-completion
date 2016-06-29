@@ -104,7 +104,7 @@ you update mpv so it's <strong>not</strong> necessary to install the package eve
 <h4>
 <a id="stable-jessie" class="anchor" href="#stable-jessie" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stable (Jessie)</h4>
 
-<p>Install via BunsenLabs. Set up the bunsenlabs-hydrogen repository as
+<p>Install via BunsenLabs. Set up the <code>bunsenlabs-hydrogen</code> repository as
 described <a href="https://pkg.bunsenlabs.org/index.html#bunsen-hydrogen">here</a>,
 then execute:</p>
 
@@ -113,14 +113,11 @@ then execute:</p>
 <h4>
 <a id="testing--sid" class="anchor" href="#testing--sid" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Testing &amp; Sid</h4>
 
-<p>Install from a repository.</p>
+<p>Install via the BunsenLabs unstable repository. Set up the <code>unstable</code>
+repository as explained <a href="https://pkg.bunsenlabs.org/#unstable">here</a>,
+then execute:</p>
 
-<div class="highlight highlight-source-shell"><pre><span class="pl-c"># Install the signing key</span>
-wget -O- https://pkg.bunsenlabs.org/BunsenLabs-RELEASE.asc <span class="pl-k">|</span> sudo apt-key add -
-<span class="pl-c"># Add the repository</span>
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">'</span>deb http://pkg.bunsenlabs.org/debian unstable main<span class="pl-pds">'</span></span> <span class="pl-k">|</span> sudo tee /etc/apt/sources.list.d/bunsenlabs-unstable.list
-<span class="pl-c"># Update &amp; install</span>
-sudo apt-get update <span class="pl-k">&amp;&amp;</span> sudo apt-get install mpv-bash-completion</pre></div>
+<div class="highlight highlight-source-shell"><pre>sudo apt-get update <span class="pl-k">&amp;&amp;</span> sudo apt-get install mpv-bash-completion</pre></div>
 
 <h4>
 <a id="mpv-git-builds--custom-package-build" class="anchor" href="#mpv-git-builds--custom-package-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>mpv git builds / custom package build</h4>
