@@ -9,4 +9,4 @@ check: mpv
 	bash -n mpv
 
 install: mpv
-	install -Dm644 mpv $(DESTDIR)$(PREFIX)/etc/bash_completion.d/mpv
+	install -Dm644 mpv $(DESTDIR)$(PREFIX)/share/bash-completion/completions
