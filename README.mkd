@@ -21,7 +21,7 @@ the only support version is the current mpv release.
 We support installation methods for the following platforms:
 
 * [Arch Linux](#arch-linux)
-* [Debian GNU/Linux](#debian)
+* [Debian Jessie/Testing/Unstable + Ubuntu 16.04 Xenial](#debian)
 * [OSX Homebrew](#osx-homebrew)
 * [Generic Linux/OSX/Unix](#platform-agnostic-method)
 
@@ -77,7 +77,9 @@ then execute:
 sudo apt-get update && sudo apt-get install mpv-bash-completion
 ```
 
-#### Testing & Sid
+#### Testing & Sid; Ubuntu Xenial
+
+These currently contain mpv 0.14 for which the below package is built.
 
 Install via the BunsenLabs unstable repository. Set up the `unstable`
 repository as explained [here](https://pkg.bunsenlabs.org/#unstable),
