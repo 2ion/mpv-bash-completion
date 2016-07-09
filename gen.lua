@@ -289,16 +289,35 @@ local function createScript(olist)
 if (( $BASH_VERSINFO < 4 )); then
   echo "$0: this completion function does only work with Bash >= 4."
   exit 1
-fi]],[[_mpv_s(){
+fi]],[=[_mpv_s(){
   local cmp=$1
   local cur=$2
   COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
+}
+_mpv_objarg(){
+  local p=$1 r s t
+  shift
+  if [[ $p =~ :$ ]]; then
+    for q in "$@"; do
+      r="${r}${p}${q} "
+    done
+  else
+    s=${p##*:}
+    for q in "$@"; do
+      if [[ $q =~ ^${s} ]]; then
+        r="${r}${p%:*}:${q} "
+      fi
+    done
+  fi
+  r=${r% }
+  printf "$r"
 }
 _mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[COMP_CWORD-1]}
   COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
-  compopt +o default +o filenames]]}
+  COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}
+  compopt +o default +o filenames]=]}
 
   local function ofType(...)
     local t = {}
@@ -326,11 +345,19 @@ _mpv(){
 
   local all = {}
 
+
   i("if [[ -n $cur ]]; then case \"$cur\" in")
   for o,p in ofType("Choice", "Flag") do
     i(string.format("--%s=*)_mpv_s \"%s\" \"$cur\";return;;",
         o, mapcats(p.clist, function (e) return string.format("--%s=%s", o, e) end)))
     table.insert(all, string.format("--%s=", o))
+  end
+  i("esac; fi")
+
+  i("if [[ -n $prev && $cur =~ : ]]; then case \"$prev\" in")
+  for o,p in ofType("Object") do
+    i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
+      o, p.clist and table.concat(p.clist, " ") or ""))
   end
   i("esac; fi")
 
