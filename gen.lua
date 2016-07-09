@@ -316,8 +316,7 @@ _mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[COMP_CWORD-1]}
   COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
-  COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}
-  compopt +o default +o filenames]=]}
+  COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}]=]}
 
   local function ofType(...)
     local t = {}
@@ -387,7 +386,7 @@ _mpv(){
     table.concat(all, " ")))
   i("fi")
 
-  i("compopt -o filenames -o default; _filedir")
+  i("_filedir")
 
   i("}", "complete -o nospace -F _mpv "..basename(MPV_CMD))
   return table.concat(lines, "\n")
