@@ -285,11 +285,16 @@ local function createScript(olist)
   local lines = {[[#!/bin/bash
 # mpv(1) Bash completion
 # Generated for mpv ]]..MPV_VERSION,
-[[if (( $BASH_VERSINFO < 4 )); then
-  echo "$0: this completion function does only work with Bash >= 4. You are using Bash 3."
+[[
+if (( $BASH_VERSINFO < 4 )); then
+  echo "$0: this completion function does only work with Bash >= 4."
   exit 1
-fi]],
-[[_mpv(){
+fi]],[[_mpv_s(){
+  local cmp=$1
+  local cur=$2
+  COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
+}
+_mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[COMP_CWORD-1]}
   COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
@@ -323,14 +328,14 @@ fi]],
 
   i("if [[ -n $cur ]]; then case \"$cur\" in")
   for o,p in ofType("Choice", "Flag") do
-    i(string.format("--%s=*) COMPREPLY=($(compgen -W \"%s\" -- \"$cur\")); return;;",
+    i(string.format("--%s=*)_mpv_s \"%s\" \"$cur\";return;;",
         o, mapcats(p.clist, function (e) return string.format("--%s=%s", o, e) end)))
     table.insert(all, string.format("--%s=", o))
   end
   i("esac; fi")
 
   i("if [[ -n $prev ]]; then case \"$prev\" in")
-  i(string.format("%s) _filedir; return;;",
+  i(string.format("%s)_filedir;return;;",
     mapcator(keys(olist.File), function (e)
       local o = string.format("--%s", e)
       table.insert(all, o)
@@ -339,7 +344,7 @@ fi]],
   for o, p in ofType("Object", "Numeric", "Audio", "Color", "FourCC", "Image",
     "String", "Position", "Time", "Dimen") do
     if p.clist then table.sort(p.clist) end
-    i(string.format("--%s) COMPREPLY=($(compgen -W \"%s\" -- \"$cur\")); return;;",
+    i(string.format("--%s)_mpv_s \"%s\" \"$cur\";return;;",
       o, p.clist and table.concat(p.clist, " ") or ""))
     table.insert(all, string.format("--%s", o))
   end
@@ -349,7 +354,7 @@ fi]],
   for o,_ in ofType("Single") do
     table.insert(all, string.format("--%s", o))
   end
-  i(string.format("COMPREPLY=($(compgen -W \"%s\" -- \"$cur\")); return;",
+  i(string.format("_mpv_s \"%s\" \"$cur\"; return;",
     table.concat(all, " ")))
   i("fi")
 
