@@ -356,8 +356,10 @@ _mpv(){
 
   i("if [[ -n $prev && $cur =~ : ]]; then case \"$prev\" in")
   for o,p in ofType("Object") do
-    i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
-      o, p.clist and table.concat(p.clist, " ") or ""))
+    if o:match("^[av]f") then
+      i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
+        o, p.clist and table.concat(p.clist, " ") or ""))
+    end
   end
   i("esac; fi")
 
