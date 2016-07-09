@@ -9,6 +9,8 @@ It features...
   integers and floats,
 * Completion for upper/lower bounds for integer- and float-type argument
   ranges where applicable,
+* Completion of filter lists as arguments to --vf and --af style
+  options,
 * Regular file name completion.
 
 It does so by parsing the output of
