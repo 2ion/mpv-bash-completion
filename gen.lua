@@ -295,7 +295,7 @@ fi]],[=[_mpv_s(){
   COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
 }
 _mpv_objarg(){
-  local p=$1 r s t
+  local p=$1 r s
   shift
   if [[ $p =~ :$ ]]; then
     for q in "$@"; do
