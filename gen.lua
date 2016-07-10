@@ -316,6 +316,7 @@ _mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[COMP_CWORD-1]}
   COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
+  COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}
   COMP_WORDBREAKS=${COMP_WORDBREAKS/,/}]=]}
 
   local function ofType(...)
