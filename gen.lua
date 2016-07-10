@@ -309,8 +309,7 @@ _mpv_objarg(){
       fi
     done
   fi
-  r=${r% }
-  printf "$r"
+  printf "${r% }"
 }
 _mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
