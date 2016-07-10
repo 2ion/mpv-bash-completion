@@ -297,15 +297,15 @@ fi]],[=[_mpv_s(){
 _mpv_objarg(){
   local p=$1 r s
   shift
-  if [[ $p =~ :$ ]]; then
+  if [[ $p =~ ,$ ]]; then
     for q in "$@"; do
       r="${r}${p}${q} "
     done
   else
-    s=${p##*:}
+    s=${p##*,}
     for q in "$@"; do
       if [[ $q =~ ^${s} ]]; then
-        r="${r}${p%:*}:${q} "
+        r="${r}${p%,*},${q} "
       fi
     done
   fi
@@ -316,7 +316,7 @@ _mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[COMP_CWORD-1]}
   COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
-  COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}]=]}
+  COMP_WORDBREAKS=${COMP_WORDBREAKS/,/}]=]}
 
   local function ofType(...)
     local t = {}
@@ -353,7 +353,7 @@ _mpv(){
   end
   i("esac; fi")
 
-  i("if [[ -n $prev && $cur =~ : ]]; then case \"$prev\" in")
+  i("if [[ -n $prev && $cur =~ , ]]; then case \"$prev\" in")
   for o,p in ofType("Object") do
     if o:match("^[av]f") then
       i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
