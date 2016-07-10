@@ -315,7 +315,9 @@ _mpv_objarg(){
 _mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[COMP_CWORD-1]}
+  # handle --option=a|b|c and --option a=b=c
   COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
+  # handle --af filter=arg,filter2=arg
   COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}
   COMP_WORDBREAKS=${COMP_WORDBREAKS/,/}]=]}
 
