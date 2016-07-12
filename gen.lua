@@ -192,7 +192,7 @@ local function optionList()
     local h = mpv(string.format("--%s %s=help", o, f))
     local t = {}
     for l in h:lines() do
-      local m = l:match("^%s(%w+)")
+      local m = l:match("^%s([%w%-]+)")
       if m then table.insert(t, m.."=") end
     end
     h:close()
