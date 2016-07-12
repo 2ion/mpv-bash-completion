@@ -366,7 +366,7 @@ _mpv(){
       return o
     end)))
   for o, p in ofType("Object", "Numeric", "Audio", "Color", "FourCC", "Image",
-    "String", "Position", "Time", "Dimen") do
+    "String", "Position", "Time") do
     if p.clist then table.sort(p.clist) end
     i(string.format("--%s)_mpv_s \"%s\" \"$cur\";return;;",
       o, p.clist and table.concat(p.clist, " ") or ""))
