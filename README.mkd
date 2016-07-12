@@ -10,7 +10,8 @@ It features...
 * Completion for upper/lower bounds for integer- and float-type argument
   ranges where applicable,
 * Completion of filter lists as arguments to --vf and --af style
-  options,
+  options as well as completion of filter parameters while composing filter
+  lists,
 * Regular file name completion.
 
 It does so by parsing the output of
@@ -35,10 +36,14 @@ See below for details.
 
 ## Dependencies
 
-* Bash 4 or 3.2
-  homebrew, macports or similar.
+* Bash 4 (OSX users need to install it from homebrew or macports)
 * Lua 5.1, 5.2 or 5.3 as well as LuaJIT
 * mpv
+
+Optionally:
+
+* xrandr: dynamic resolution detection and substitution under X11 and
+  xwayland
 
 ## Installation
 
