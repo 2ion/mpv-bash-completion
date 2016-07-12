@@ -70,15 +70,6 @@ local function mpv(...)
   return run(MPV_CMD, false, "--no-config", ...)
 end
 
-local function xrandr()
-  local r =  run("xrandr", true)
-  if not r then
-    log("xrandr: failed to run, ignoring")
-    return nil
-  end
-  return r
-end
-
 local function assert_read(h, w)
   return assert(h:read(w or "*all"), "can't read from file handle: no data")
 end
@@ -165,23 +156,6 @@ local function optionList()
     return clist
   end
 
-  local function getCommonXrandrResList()
-    local h = xrandr()
-    if not h then return end
-    local d = assert_read(h)
-    h:close()
-    local clist = {}
-    for res in d:gmatch("(%d+x%d+)") do
-      table.insert(clist, res)
-    end
-    table.sort(clist, function (a, b)
-      local x  = a:match("^(%d+)x")
-      local y  = b:match("^(%d+)x")
-      return tonumber(x) > tonumber(y)
-    end)
-    return unique(clist)
-  end
-
   local function extractChoices(tail)
     local sub = tail:match("Choices: ([^()]+)")
     local clist = {}
@@ -215,7 +189,6 @@ local function optionList()
   end
 
   local videoFormats = getRawVideoMpFormats()
-  local x11ResList = getCommonXrandrResList()
 
   local function parseOpt(o, tail)
     local ot = tail:match("(%S+)")
@@ -242,8 +215,7 @@ local function optionList()
                                    ot = "Position"
     elseif ot == "String"     then if wantsFile(tail) then ot = "File" else clist = extractDefault(tail) end
     elseif ot == "Time"       then clist = { "00:00:00" }
-    elseif ot == "Window"     then clist = x11ResList
-                                   ot = "Dimen"
+    elseif ot == "Window"     then ot = "Dimen"
     else
       ot = "Single"
     end
@@ -289,7 +261,29 @@ local function createScript(olist)
 if (( $BASH_VERSINFO < 4 )); then
   echo "$0: this completion function does only work with Bash >= 4."
   exit 1
-fi]],[=[_mpv_s(){
+fi]],[=[
+_mpv_uniq(){
+  local -A w
+  local o=""
+  for ww in "$@"; do
+    if [[ -z "${w[$ww]}" ]]; then
+      o="${o}${ww} "
+      w[$ww]=x
+    fi
+  done
+  printf "${o% }"
+}
+_mpv_xrandr_cache=""
+_mpv_xrandr(){
+  if [[ -z "$_mpv_xrandr_cache" && -n "$DISPLAY" ]] && type xrandr &>/dev/null; then
+    _mpv_xrandr_cache=$(xrandr|while read l; do
+      [[ $l =~ ([0-9]+x[0-9]+) ]] && echo "${BASH_REMATCH[1]}"
+    done)
+    _mpv_xrandr_cache=$(_mpv_uniq $_mpv_xrandr_cache)
+  fi
+  printf "$_mpv_xrandr_cache"
+}
+_mpv_s(){
   local cmp=$1
   local cur=$2
   COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
@@ -344,7 +338,11 @@ _mpv(){
     end
   end
 
-  local all = {}
+  local all = setmetatable({}, {
+    __call = function (t, o)
+      table.insert(t, string.format("--%s", o))
+    end
+  })
 
 
   i("if [[ -n $cur ]]; then case \"$cur\" in")
@@ -376,14 +374,16 @@ _mpv(){
     if p.clist then table.sort(p.clist) end
     i(string.format("--%s)_mpv_s \"%s\" \"$cur\";return;;",
       o, p.clist and table.concat(p.clist, " ") or ""))
-    table.insert(all, string.format("--%s", o))
+    all(o)
+  end
+  for o,p in ofType("Dimen") do
+    i(string.format([[--%s)_mpv_s "$(_mpv_xrandr)" "$cur";return;;]], o))
+    all(o)
   end
   i("esac; fi")
 
   i("if [[ $cur =~ ^- ]]; then")
-  for o,_ in ofType("Single") do
-    table.insert(all, string.format("--%s", o))
-  end
+  for o,_ in ofType("Single") do all(o) end
   i(string.format("_mpv_s \"%s\" \"$cur\"; return;",
     table.concat(all, " ")))
   i("fi")
