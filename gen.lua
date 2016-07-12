@@ -257,11 +257,7 @@ local function createScript(olist)
   local lines = {[[#!/bin/bash
 # mpv(1) Bash completion
 # Generated for mpv ]]..MPV_VERSION,
-[[
-if (( $BASH_VERSINFO < 4 )); then
-  echo "$0: this completion function does only work with Bash >= 4."
-  exit 1
-fi]],[=[
+[=[
 _mpv_uniq(){
   local -A w
   local o=""

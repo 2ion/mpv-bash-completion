@@ -35,7 +35,7 @@ See below for details.
 
 ## Dependencies
 
-* Bash 4. OS X users must install an up-to-date Bash version using
+* Bash 4 or 3.2
   homebrew, macports or similar.
 * Lua 5.1, 5.2 or 5.3 as well as LuaJIT
 * mpv
