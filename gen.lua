@@ -188,6 +188,17 @@ local function optionList()
     return m and true or false
   end
 
+  local function getAVFilterArgs(o, f)
+    local h = mpv(string.format("--%s %s=help", o, f))
+    local t = {}
+    for l in h:lines() do
+      local m = l:match("^%s(%w+)")
+      if m then table.insert(t, m.."=") end
+    end
+    h:close()
+    return t
+  end
+
   local videoFormats = getRawVideoMpFormats()
 
   local function parseOpt(o, tail)
@@ -233,12 +244,20 @@ local function optionList()
 
   h:close()
 
-  -- --af*/--vf* list aliases
   local no = {}
+  local fargs = {}
   for o,p in pairs(t.Object) do
     if o:sub(-1) == "*" then
       local stem = o:sub(1, -2)
       local alter = t.Object[stem.."-defaults"]
+      -- filter argument detection
+      log(" fargs: %s", stem)
+      for _,e in ipairs(alter.clist) do
+        if not fargs[e] then
+          fargs[e] = getAVFilterArgs(stem, e)
+        end
+      end
+      -- af/vf aliases
       for _,variant in pairs(p.clist) do
         log(" alias: %s -> %s", variant, stem)
         no[variant] = alter
@@ -249,67 +268,12 @@ local function optionList()
     end
   end
   t.Object = no
+  setmetatable(t, { fargs = fargs })
 
   return t
 end
 
 local function createScript(olist)
-  local lines = {[[#!/bin/bash
-# mpv(1) Bash completion
-# Generated for mpv ]]..MPV_VERSION,
-[=[
-_mpv_uniq(){
-  local -A w
-  local o=""
-  for ww in "$@"; do
-    if [[ -z "${w[$ww]}" ]]; then
-      o="${o}${ww} "
-      w[$ww]=x
-    fi
-  done
-  printf "${o% }"
-}
-_mpv_xrandr_cache=""
-_mpv_xrandr(){
-  if [[ -z "$_mpv_xrandr_cache" && -n "$DISPLAY" ]] && type xrandr &>/dev/null; then
-    _mpv_xrandr_cache=$(xrandr|while read l; do
-      [[ $l =~ ([0-9]+x[0-9]+) ]] && echo "${BASH_REMATCH[1]}"
-    done)
-    _mpv_xrandr_cache=$(_mpv_uniq $_mpv_xrandr_cache)
-  fi
-  printf "$_mpv_xrandr_cache"
-}
-_mpv_s(){
-  local cmp=$1
-  local cur=$2
-  COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
-}
-_mpv_objarg(){
-  local p=$1 r s
-  shift
-  if [[ $p =~ ,$ ]]; then
-    for q in "$@"; do
-      r="${r}${p}${q} "
-    done
-  else
-    s=${p##*,}
-    for q in "$@"; do
-      if [[ $q =~ ^${s} ]]; then
-        r="${r}${p%,*},${q} "
-      fi
-    done
-  fi
-  printf "${r% }"
-}
-_mpv(){
-  local cur=${COMP_WORDS[COMP_CWORD]}
-  local prev=${COMP_WORDS[COMP_CWORD-1]}
-  # handle --option=a|b|c and --option a=b=c
-  COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
-  # handle --af filter=arg,filter2=arg
-  COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}
-  COMP_WORDBREAKS=${COMP_WORDBREAKS/,/}]=]}
-
   local function ofType(...)
     local t = {}
     for _,k in ipairs{...} do
@@ -328,18 +292,102 @@ _mpv(){
     return u
   end
 
+  local lines = {}
   local function i(...)
     for _,e in ipairs{...} do
       table.insert(lines, e)
     end
   end
 
+  i([[#!/bin/bash
+# mpv(1) Bash completion
+# Generated for mpv ]]..MPV_VERSION)
+
+  i([[### LOOKUP TABLES AND CACHES ###
+_mpv_xrandr_cache=""
+declare -A _mpv_fargs]])
+  local fargs = getmetatable(olist).fargs
+  for f,v in pairs(fargs) do
+    i(string.format([[_mpv_fargs[%s]="%s"]], f,
+      table.concat(v, " ")))
+  end
+
+  i([=[### HELPER FUNCTIONS ###
+_mpv_uniq(){
+  local -A w
+  local o=""
+  for ww in "$@"; do
+    if [[ -z "${w[$ww]}" ]]; then
+      o="${o}${ww} "
+      w[$ww]=x
+    fi
+  done
+  printf "${o% }"
+}
+_mpv_xrandr(){
+  if [[ -z "$_mpv_xrandr_cache" && -n "$DISPLAY" ]] && type xrandr &>/dev/null; then
+    _mpv_xrandr_cache=$(xrandr|while read l; do
+      [[ $l =~ ([0-9]+x[0-9]+) ]] && echo "${BASH_REMATCH[1]}"
+    done)
+    _mpv_xrandr_cache=$(_mpv_uniq $_mpv_xrandr_cache)
+  fi
+  printf "$_mpv_xrandr_cache"
+}
+_mpv_s(){
+  local cmp=$1
+  local cur=$2
+  COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
+}
+_mpv_objarg(){
+  local p=$1 r s t
+  shift
+  if [[ $p =~ :$ ]]; then
+    # current filter
+    s=${p##*,}
+    s=${s%%:*}
+    for q in ${_mpv_fargs[$s]}; do
+      r="${r}${p}${q} "
+    done
+  elif [[ ${p##*,} =~ : ]]; then
+    s=${p##*,}
+    s=${s%%:*}
+    # current argument
+    t=${p##*:}
+    for q in ${_mpv_fargs[$s]}; do
+      if [[ $q =~ ^${t} ]]; then
+        r="${r}${p%:*}:${q} "
+      fi
+    done
+  elif [[ $p =~ ,$ ]]; then
+    for q in "$@"; do
+      r="${r}${p}${q} "
+    done
+  else
+    s=${p##*,}
+    for q in "$@"; do
+      if [[ $q =~ ^${s} ]]; then
+        r="${r}${p%,*},${q} "
+      fi
+    done
+  fi
+  printf "${r% }"
+}]=])
+
+  i([=[### COMPLETION ###
+_mpv(){
+  local cur=${COMP_WORDS[COMP_CWORD]}
+  local prev=${COMP_WORDS[COMP_CWORD-1]}
+  # handle --option=a|b|c and --option a=b=c
+  COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
+  # handle --af filter=arg,filter2=arg
+  COMP_WORDBREAKS=${COMP_WORDBREAKS/:/}
+  COMP_WORDBREAKS=${COMP_WORDBREAKS/,/}]=])
+
   local all = setmetatable({}, {
     __call = function (t, o)
       table.insert(t, string.format("--%s", o))
     end
   })
-
 
   i("if [[ -n $cur ]]; then case \"$cur\" in")
   for o,p in ofType("Choice", "Flag") do
@@ -349,7 +397,7 @@ _mpv(){
   end
   i("esac; fi")
 
-  i("if [[ -n $prev && $cur =~ , ]]; then case \"$prev\" in")
+  i("if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case \"$prev\" in")
   for o,p in ofType("Object") do
     if o:match("^[av]f") then
       i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
