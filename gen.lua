@@ -251,7 +251,6 @@ local function optionList()
       local stem = o:sub(1, -2)
       local alter = t.Object[stem.."-defaults"]
       -- filter argument detection
-      log(" fargs: %s", stem)
       for _,e in ipairs(alter.clist) do
         if not fargs[e] then
           fargs[e] = getAVFilterArgs(stem, e)
@@ -265,6 +264,13 @@ local function optionList()
       no[stem] = alter
     else
       no[o] = p
+    end
+    if o:match("^[av]o") and p.clist then
+      for _,e in ipairs(p.clist) do
+        if not fargs[e] then
+          fargs[e] = getAVFilterArgs(o, e)
+        end
+      end
     end
   end
   t.Object = no
@@ -399,7 +405,7 @@ _mpv(){
 
   i("if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case \"$prev\" in")
   for o,p in ofType("Object") do
-    if o:match("^[av]f") then
+    if o:match("^[av][fo]") then
       i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
         o, p.clist and table.concat(p.clist, " ") or ""))
     end

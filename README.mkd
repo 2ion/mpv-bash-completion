@@ -12,6 +12,7 @@ It features...
 * Completion of filter lists as arguments to --vf and --af style
   options as well as completion of filter parameters while composing filter
   lists,
+* Similarly, parameter completion for video and audio outputs (--vo, --ao),
 * Regular file name completion.
 
 It does so by parsing the output of
