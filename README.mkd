@@ -10,7 +10,9 @@ It features...
 * Completion for upper/lower bounds for integer- and float-type argument
   ranges where applicable,
 * Completion of filter lists as arguments to --vf and --af style
-  options,
+  options as well as completion of filter parameters while composing filter
+  lists,
+* Similarly, parameter completion for video and audio outputs (--vo, --ao),
 * Regular file name completion.
 
 It does so by parsing the output of
@@ -35,10 +37,14 @@ See below for details.
 
 ## Dependencies
 
-* Bash 4. OS X users must install an up-to-date Bash version using
-  homebrew, macports or similar.
+* Bash 4 (OSX users need to install it from homebrew or macports)
 * Lua 5.1, 5.2 or 5.3 as well as LuaJIT
 * mpv
+
+Optionally:
+
+* xrandr: dynamic resolution detection and substitution under X11 and
+  xwayland
 
 ## Installation
 
@@ -68,6 +74,8 @@ you update mpv so it's **not** necessary to install the package every time.
 The PKGBUILD lives on the [`aur4`](https://github.com/2ion/mpv-bash-completion/tree/aur4) branch.
 
 ### Debian
+
+.deb packages can be downloaded directly [here](https://pkg.bunsenlabs.org/debian/pool/main/m/mpv-bash-completion/).
 
 #### Stable (Jessie)
 
