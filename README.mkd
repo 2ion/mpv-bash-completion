@@ -75,6 +75,8 @@ The PKGBUILD lives on the [`aur4`](https://github.com/2ion/mpv-bash-completion/t
 
 ### Debian
 
+.deb packages can be downloaded directly [here](https://pkg.bunsenlabs.org/debian/pool/main/m/mpv-bash-completion/).
+
 #### Stable (Jessie)
 
 Install via BunsenLabs. Set up the `bunsenlabs-hydrogen` repository as
