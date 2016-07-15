@@ -207,7 +207,7 @@ local function parseOpt(t, lu, group, o, tail)
                                  ot = "String"
   elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
                                  ot = "Position"
-  elseif ot == "String"     then if wantsFile(tail) then ot = "File" else clist = extractDefault(tail) end
+  elseif ot == "String"     then if wantsFile(tail) then ot = "File" else clist = { extractDefault(tail) } end
   elseif ot == "Time"       then clist = { "00:00:00" }
   elseif ot == "Window"     then ot = "Dimen"
   else
