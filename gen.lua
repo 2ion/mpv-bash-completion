@@ -129,123 +129,128 @@ local Option = setmetatable({}, {
   end
 })
 
-local function optionList()
-  local h = mpv("--list-options")
-  local t = {}
+local function expandObject(o)
+  local h = mpv(string.format("--%s help", o))
+  local clist = {}
+  for l in h:lines() do
+    local m = l:match("^%s%s(%S+)")
+    if m then table.insert(clist, m) end
+  end
+  h:close()
+  return clist
+end
 
-  local function expandObject(o)
-    local h = mpv(string.format("--%s help", o))
-    local clist = {}
-    for l in h:lines() do
-      local m = l:match("^%s%s(%S+)")
-      if m then table.insert(clist, m) end
-    end
-    h:close()
-    return clist
+local function getRawVideoMpFormats()
+  local h = mpv("--demuxer-rawvideo-mp-format=help")
+  local line = assert_read(h)
+  local clist = {}
+  line = line:match(": (.*)")
+  for f in line:gmatch("%w+") do
+    table.insert(clist, f)
+  end
+  h:close()
+  return clist
+end
+
+local function extractChoices(tail)
+  local sub = tail:match("Choices: ([^()]+)")
+  local clist = {}
+  for c in sub:gmatch("%S+") do
+    table.insert(clist, c)
+  end
+  return clist
+end
+
+local function extractDefault(tail)
+  return tail:match("default: ([^)]+)")
+end
+
+local function extractRange(tail)
+  local a, b = tail:match("%(([%d.-]+) to ([%d.-]+)%)")
+  if a and b then
+    return tostring(a), tostring(b)
+  else
+    return nil
+  end
+end
+
+local function wantsFile(tail)
+  local m = tail:match("%[file%]")
+  return m and true or false
+end
+
+local function hasNoCfg(tail)
+  local m = tail:match("%[nocfg%]") -- or tail:match("%[global%]") -- Fuck.
+  return m and true or false
+end
+
+local function parseOpt(t, lu, group, o, tail)
+  local ot = tail:match("(%S+)")
+  local clist = nil
+
+  if oneOf(ot, "Integer", "Double", "Float", "Integer64")
+                            then clist = { extractDefault(tail), extractRange(tail) }
+                                 ot = "Numeric"
+  elseif ot == "Flag"       then if hasNoCfg(tail) or o:match("^no%-") then ot = "Single"
+                                 else clist = { "yes", "no", extractDefault(tail) } end
+  elseif ot == "Audio"      then clist = { extractDefault(tail), extractRange(tail) }
+  elseif ot == "Choices:"   then clist = { extractRange(tail), extractDefault(tail), table.unpack(extractChoices(tail)) }
+                                 ot = "Choice"
+  elseif ot == "Color"      then clist = { "#ffffff", "1.0/1.0/1.0/1.0" }
+  elseif ot == "FourCC"     then clist = { "YV12", "UYVY", "YUY2", "I420", "other" }
+  elseif ot == "Image"      then clist = lu.videoFormats
+  elseif ot == "Int[-Int]"  then clist = { "j-k" }
+                                 ot = "Numeric"
+  elseif ot == "Key/value"  then ot = "String"
+  elseif ot == "Object"     then clist = expandObject(o)
+  elseif ot == "Output"     then clist = { "all=no", "all=fatal", "all=error", "all=warn", "all=info", "all=status", "all=v", "all=debug", "all=trace" }
+                                 ot = "String"
+  elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
+                                 ot = "Position"
+  elseif ot == "String"     then if wantsFile(tail) then ot = "File" else clist = extractDefault(tail) end
+  elseif ot == "Time"       then clist = { "00:00:00" }
+  elseif ot == "Window"     then ot = "Dimen"
+  else
+    ot = "Single"
   end
 
-  local function getRawVideoMpFormats()
-    local h = mpv("--demuxer-rawvideo-mp-format=help")
-    local line = assert_read(h)
-    local clist = {}
-    line = line:match(": (.*)")
-    for f in line:gmatch("%w+") do
-      table.insert(clist, f)
-    end
-    h:close()
-    return clist
-  end
+  local oo = Option(clist)
+  log("option: %s :: %s -> [%d]", o, ot, oo.clist and #oo.clist or 0)
 
-  local function extractChoices(tail)
-    local sub = tail:match("Choices: ([^()]+)")
-    local clist = {}
-    for c in sub:gmatch("%S+") do
-      table.insert(clist, c)
-    end
-    return clist
-  end
-
-  local function extractDefault(tail)
-    return tail:match("default: ([^)]+)")
-  end
-
-  local function extractRange(tail)
-    local a, b = tail:match("%(([%d.-]+) to ([%d.-]+)%)")
-    if a and b then
-      return tostring(a), tostring(b)
-    else
-      return nil
-    end
-  end
-
-  local function wantsFile(tail)
-    local m = tail:match("%[file%]")
-    return m and true or false
-  end
-
-  local function hasNoCfg(tail)
-    local m = tail:match("%[nocfg%]") -- or tail:match("%[global%]") -- Fuck.
-    return m and true or false
-  end
-
-  local function getAVFilterArgs(o, f)
-    local h = mpv(string.format("--%s %s=help", o, f))
-    local t = {}
-    for l in h:lines() do
-      local m = l:match("^%s([%w%-]+)")
-      if m then table.insert(t, m.."=") end
-    end
-    h:close()
-    return t
-  end
-
-  local videoFormats = getRawVideoMpFormats()
-
-  local function parseOpt(o, tail)
-    local ot = tail:match("(%S+)")
-    local clist = nil
-
-    if oneOf(ot, "Integer", "Double", "Float", "Integer64")
-                              then clist = { extractDefault(tail), extractRange(tail) }
-                                   ot = "Numeric"
-    elseif ot == "Flag"       then if hasNoCfg(tail) or o:match("^no%-") then ot = "Single"
-                                   else clist = { "yes", "no", extractDefault(tail) } end
-    elseif ot == "Audio"      then clist = { extractDefault(tail), extractRange(tail) }
-    elseif ot == "Choices:"   then clist = { extractRange(tail), extractDefault(tail), table.unpack(extractChoices(tail)) }
-                                   ot = "Choice"
-    elseif ot == "Color"      then clist = { "#ffffff", "1.0/1.0/1.0/1.0" }
-    elseif ot == "FourCC"     then clist = { "YV12", "UYVY", "YUY2", "I420", "other" }
-    elseif ot == "Image"      then clist = videoFormats
-    elseif ot == "Int[-Int]"  then clist = { "j-k" }
-                                   ot = "Numeric"
-    elseif ot == "Key/value"  then ot = "String"
-    elseif ot == "Object"     then clist = expandObject(o)
-    elseif ot == "Output"     then clist = { "all=no", "all=fatal", "all=error", "all=warn", "all=info", "all=status", "all=v", "all=debug", "all=trace" }
-                                   ot = "String"
-    elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
-                                   ot = "Position"
-    elseif ot == "String"     then if wantsFile(tail) then ot = "File" else clist = extractDefault(tail) end
-    elseif ot == "Time"       then clist = { "00:00:00" }
-    elseif ot == "Window"     then ot = "Dimen"
-    else
-      ot = "Single"
-    end
-
+  if group then
     t[ot] = t[ot] or {}
-    local oo = Option(clist)
     t[ot][o] = oo
-    log("option: %s :: %s -> [%d]", o, ot, oo.clist and #oo.clist or 0)
+  else
+    t[o] = oo
   end
+end
 
+local function getAVFilterArgs2(o, f)
+  local h = mpv(string.format("--%s %s=help", o, f))
+  local t = {}
+  local lu = { videoFormats = getRawVideoMpFormats() }
+  for l in h:lines() do
+    local o, tail = l:match("^%s([%w%-]+)%s+(%S.*)")
+    if o then parseOpt(t, lu, false, o, tail) end
+  end
+  h:close()
+  return t
+end
+
+local function optionList()
+  local t = {}
+  local lu = { videoFormats = getRawVideoMpFormats() }
+
+  local h = mpv("--list-options")
   for s in h:lines() do
     local o, s= s:match("^ %-%-(%S+)%s+(%S.*)")
-    if o then parseOpt(o, s) end
+    if o then parseOpt(t, lu, true, o, s) end
   end
-
   h:close()
 
   local no = {}
   local fargs = {}
+  local fargs2 = {}
   for o,p in pairs(t.Object) do
     if o:sub(-1) == "*" then
       local stem = o:sub(1, -2)
@@ -253,7 +258,7 @@ local function optionList()
       -- filter argument detection
       for _,e in ipairs(alter.clist) do
         if not fargs[e] then
-          fargs[e] = getAVFilterArgs(stem, e)
+          fargs[e] = getAVFilterArgs2(stem, e)
         end
       end
       -- af/vf aliases
@@ -268,7 +273,7 @@ local function optionList()
     if o:match("^[av]o") and p.clist then
       for _,e in ipairs(p.clist) do
         if not fargs[e] then
-          fargs[e] = getAVFilterArgs(o, e)
+          fargs[e] = getAVFilterArgs2(o, e)
         end
       end
     end
@@ -311,11 +316,23 @@ local function createScript(olist)
 
   i([[### LOOKUP TABLES AND CACHES ###
 _mpv_xrandr_cache=""
-declare -A _mpv_fargs]])
+declare -A _mpv_fargs
+declare -A _mpv_pargs]])
   local fargs = getmetatable(olist).fargs
   for f,v in pairs(fargs) do
-    i(string.format([[_mpv_fargs[%s]="%s"]], f,
-      table.concat(v, " ")))
+    local flist = table.concat(keys(v), "= ")
+    if #flist > 0 then
+      flist = flist.."="
+      i(string.format([[_mpv_fargs[%s]="%s"]], f, flist))
+    end
+  end
+  for f,v in pairs(fargs) do
+    for p,w in pairs(v) do
+      local plist = w.clist and table.concat(w.clist, " ") or ""
+      if #plist > 0 then
+        i(string.format([[_mpv_pargs[%s@%s]="%s"]], f, p, plist))
+      end
+    end
   end
 
   i([=[### HELPER FUNCTIONS ###
@@ -345,15 +362,62 @@ _mpv_s(){
   COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
 }
 _mpv_objarg(){
-  local p=$1 r s t
+  local p=$1 r s t k f
   shift
-  if [[ $p =~ :$ ]]; then
+  # Parameter arguments I:
+  # All available parameters
+  if [[ $p =~ : && $p =~ =$ ]]; then
+    # current filter
+    s=${p##*,}
+    s=${s%%:*}
+    # current parameter
+    t=${p%=}
+    t=${t##*:}
+    # index key
+    k="$s@$t"
+    echo "$k -- $p">>DEBUG
+    if [[ ${_mpv_pargs[$k]+x} ]]; then
+      for q in ${_mpv_pargs[$k]}; do
+        r="${r}${p}${q} "
+      done
+    fi
+  
+  # Parameter arguments II:
+  # Fragment completion
+  elif [[ $p =~ : && ${p##*:} =~ = ]]; then
+    # current filter
+    s=${p##*,}
+    s=${s%%:*}
+    # current parameter
+    t=${p%=}
+    t=${t##*:}
+    t=${t%%=*}
+    # index key
+    k="$s@$t"
+    # fragment
+    f=${p##*=}
+    echo "$k -- $p -- $f" >> DEBUG
+    if [[ ${_mpv_pargs[$k]+x} ]]; then
+      for q in ${_mpv_pargs[$k]}; do
+        if [[ $q =~ ^${f} ]]; then
+          r="${r}${p%=*}=${q} "
+          echo ".$r" >> DEBUG
+        fi
+      done
+    fi
+
+  # Filter parameters I:
+  # Suggest all available parameters
+  elif [[ $p =~ :$ ]]; then
     # current filter
     s=${p##*,}
     s=${s%%:*}
     for q in ${_mpv_fargs[$s]}; do
       r="${r}${p}${q} "
     done
+
+  # Filter parameters II:
+  # Complete fragment
   elif [[ ${p##*,} =~ : ]]; then
     s=${p##*,}
     s=${s%%:*}
@@ -364,10 +428,16 @@ _mpv_objarg(){
         r="${r}${p%:*}:${q} "
       fi
     done
+  
+  # Filter list I:
+  # All available filters
   elif [[ $p =~ ,$ ]]; then
     for q in "$@"; do
       r="${r}${p}${q} "
     done
+
+  # Filter list II:
+  # Complete fragment
   else
     s=${p##*,}
     for q in "$@"; do
