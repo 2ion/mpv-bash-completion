@@ -375,7 +375,6 @@ _mpv_objarg(){
     t=${t##*:}
     # index key
     k="$s@$t"
-    echo "$k -- $p">>DEBUG
     if [[ ${_mpv_pargs[$k]+x} ]]; then
       for q in ${_mpv_pargs[$k]}; do
         r="${r}${p}${q} "
@@ -396,7 +395,6 @@ _mpv_objarg(){
     k="$s@$t"
     # fragment
     f=${p##*=}
-    echo "$k -- $p -- $f" >> DEBUG
     if [[ ${_mpv_pargs[$k]+x} ]]; then
       for q in ${_mpv_pargs[$k]}; do
         if [[ $q =~ ^${f} ]]; then
