@@ -58,7 +58,6 @@ Just execute
 # You may set the following environment variables beforehand:
 # export MPV_BASHCOMPGEN_VERBOSE=1 # verbose debug/progress output
 # export MPV_BASHCOMPGEN_MPV_CMD=mpv # path or command to execute mpv, defaults to 'mpv'
-# export MPV_BASHCOMPGEN_VERBOSE=foo # override version tag in the output file
 
 ./gen.lua > mpv.sh
 ```

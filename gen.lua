@@ -9,20 +9,17 @@
 --    MPV_BASHCOMPGEN_VERBOSE     Enable debug output on stderr
 --    MPV_BASHCOMPGEN_MPV_CMD     mpv binary to use. Defaults to 'mpv',
 --                                using the shell's $PATH.
---    MPV_BASHCOMPGEN_MPV_VERSION Marker to place in the generated file.
---                                Normally, this is the mpv version.
 
 local VERBOSE     = not not os.getenv("MPV_BASHCOMPGEN_VERBOSE") or false
 local MPV_CMD     = os.getenv("MPV_BASHCOMPGEN_MPV_CMD") or "mpv"
-local MPV_VERSION = os.getenv("MPV_BASHCOMPGEN_MPV_VERSION")
+local MPV_VERSION = "unknown"
+local LOOKUP      = nil
 
 -----------------------------------------------------------------------
 
 if _VERSION == "Lua 5.1" then table.unpack = unpack end
 
 -----------------------------------------------------------------------
-
--- Helper functions
 
 local function log(s, ...)
   if VERBOSE then
@@ -48,38 +45,31 @@ local function debug_categories(ot)
     sum = sum + c
   end
   table.sort(lines)
-  table.insert(lines, string.format("======: %d", sum))
+  table.insert(lines, string.format("      : %d", sum))
   log(table.concat(lines, "\n"))
 end
+
+-----------------------------------------------------------------------
 
 local function basename(s)
   return s:match("^.-([^/]+)$")
 end
 
-local function run(cmd, softfail, ...)
+local function run(cmd, ...)
   local argv = table.concat({...}, " ")
   log("   run: %s %s", cmd, argv)
-  if softfail then
-    return io.popen(string.format("%s " .. argv, cmd), "r")
-  else
-    return assert(io.popen(string.format("%s " .. argv, cmd), "r"))
-  end
+  return assert(io.popen(string.format("%s " .. argv, cmd), "r"))
 end
 
 local function mpv(...)
-  return run(MPV_CMD, false, "--no-config", ...)
+  return run(MPV_CMD, "--no-config", ...)
 end
 
 local function assert_read(h, w)
   return assert(h:read(w or "*all"), "can't read from file handle: no data")
 end
 
-local function getMpvVersion()
-  local h = mpv("--version")
-  local s = assert_read(h, "*line")
-  h:close()
-  return s:match("^%S+ (%S+)")
-end
+-----------------------------------------------------------------------
 
 local function oneOf(n, ...)
   for _,v in ipairs{...} do
@@ -96,17 +86,9 @@ local function map(t, f)
   return u
 end
 
-local function mapcat(t, f, c)
-  return table.concat(map(t, f), c)
-end
-
-local function mapcats(t, f)
-  return mapcat(t, f, " ")
-end
-
-local function mapcator(t, f)
-  return mapcat(t, f, "|")
-end
+local function mapcat   (t, f, c) return table.concat(map(t, f), c) end
+local function mapcats  (t, f)    return mapcat(t, f, " ") end
+local function mapcator (t, f)    return mapcat(t, f, "|") end
 
 local function unique(t)
   local u, f = {}, {}
@@ -119,6 +101,16 @@ local function unique(t)
   return u
 end
 
+local function keys(t)
+  local u = {}
+  for k,_ in pairs(t) do
+    table.insert(u, k)
+  end
+  return u
+end
+
+-----------------------------------------------------------------------
+
 local Option = setmetatable({}, {
   __call = function (t, clist)
     local o = {}
@@ -128,6 +120,16 @@ local Option = setmetatable({}, {
     return setmetatable(o, { __index = t })
   end
 })
+
+-----------------------------------------------------------------------
+
+local function getMpvVersion()
+  local h = mpv("--version")
+  local s = assert_read(h, "*line")
+  h:close()
+  return s:match("^%S+ (%S+)")
+end
+
 
 local function expandObject(o)
   local h = mpv(string.format("--%s help", o))
@@ -228,10 +230,9 @@ end
 local function getAVFilterArgs2(o, f)
   local h = mpv(string.format("--%s %s=help", o, f))
   local t = {}
-  local lu = { videoFormats = getRawVideoMpFormats() }
   for l in h:lines() do
     local o, tail = l:match("^%s([%w%-]+)%s+(%S.*)")
-    if o then parseOpt(t, lu, false, o, tail) end
+    if o then parseOpt(t, LOOKUP, false, o, tail) end
   end
   h:close()
   return t
@@ -239,18 +240,17 @@ end
 
 local function optionList()
   local t = {}
-  local lu = { videoFormats = getRawVideoMpFormats() }
-
   local h = mpv("--list-options")
+
   for s in h:lines() do
     local o, s= s:match("^ %-%-(%S+)%s+(%S.*)")
-    if o then parseOpt(t, lu, true, o, s) end
+    if o then parseOpt(t, LOOKUP, true, o, s) end
   end
+
   h:close()
 
   local no = {}
   local fargs = {}
-  local fargs2 = {}
   for o,p in pairs(t.Object) do
     if o:sub(-1) == "*" then
       local stem = o:sub(1, -2)
@@ -285,6 +285,8 @@ local function optionList()
 end
 
 local function createScript(olist)
+  local lines = {}
+
   local function ofType(...)
     local t = {}
     for _,k in ipairs{...} do
@@ -295,15 +297,6 @@ local function createScript(olist)
     return pairs(t)
   end
 
-  local function keys(t)
-    local u = {}
-    for k,_ in pairs(t) do
-      table.insert(u, k)
-    end
-    return u
-  end
-
-  local lines = {}
   local function i(...)
     for _,e in ipairs{...} do
       table.insert(lines, e)
@@ -513,7 +506,8 @@ _mpv(){
 end
 
 local function main()
-  MPV_VERSION = MPV_VERSION or getMpvVersion()
+  MPV_VERSION = getMpvVersion()
+  LOOKUP = { videoFormats = getRawVideoMpFormats() }
   local l = optionList()
   debug_categories(l)
   print(createScript(l))
