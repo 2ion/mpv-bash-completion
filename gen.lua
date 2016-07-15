@@ -383,7 +383,7 @@ _mpv_objarg(){
   
   # Parameter arguments II:
   # Fragment completion
-  elif [[ $p =~ : && ${p##*:} =~ = ]]; then
+  elif [[ ! $p =~ , && ( $p =~ : && ${p##*:} =~ = ) ]]; then
     # current filter
     s=${p##*,}
     s=${s%%:*}
