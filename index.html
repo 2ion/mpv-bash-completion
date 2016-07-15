@@ -12,7 +12,7 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">mpv-bash-completion</h1>
-      <h2 class="project-tagline">Bash completion for the mpv video player · Linux/BSD/OSX</h2>
+      <h2 class="project-tagline">Featureful Bash completion for the mpv video player · Linux/BSD/OSX</h2>
       <a href="https://github.com/2ion/mpv-bash-completion" class="btn">View on GitHub</a>
       <a href="https://github.com/2ion/mpv-bash-completion/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/2ion/mpv-bash-completion/tarball/master" class="btn">Download .tar.gz</a>
@@ -30,7 +30,9 @@ integers and floats,</li>
 <li>Completion for upper/lower bounds for integer- and float-type argument
 ranges where applicable,</li>
 <li>Completion of filter lists as arguments to --vf and --af style
-options,</li>
+options as well as completion of filter parameters while composing filter
+lists,</li>
+<li>Similarly, parameter completion for video and audio outputs (--vo, --ao),</li>
 <li>Regular file name completion.</li>
 </ul>
 
@@ -64,10 +66,16 @@ the only support version is the current mpv release.</p>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h2>
 
 <ul>
-<li>Bash 4. OS X users must install an up-to-date Bash version using
-homebrew, macports or similar.</li>
+<li>Bash 4 (OSX users need to install it from homebrew or macports)</li>
 <li>Lua 5.1, 5.2 or 5.3 as well as LuaJIT</li>
 <li>mpv</li>
+</ul>
+
+<p>Optionally:</p>
+
+<ul>
+<li>xrandr: dynamic resolution detection and substitution under X11 and
+xwayland</li>
 </ul>
 
 <h2>
@@ -102,6 +110,8 @@ you update mpv so it's <strong>not</strong> necessary to install the package eve
 
 <h3>
 <a id="debian" class="anchor" href="#debian" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Debian</h3>
+
+<p>.deb packages can be downloaded directly <a href="https://pkg.bunsenlabs.org/debian/pool/main/m/mpv-bash-completion/">here</a>.</p>
 
 <h4>
 <a id="stable-jessie" class="anchor" href="#stable-jessie" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stable (Jessie)</h4>
