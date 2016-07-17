@@ -30,6 +30,7 @@ end
 -- Reporting on optionList() result
 local function debug_categories(ot)
   if not VERBOSE then return end
+  log("Counting top-level options...")
   local lines = {}
   local function count(t)
     local n = 0
@@ -41,11 +42,11 @@ local function debug_categories(ot)
   local sum = 0
   for cat,t in pairs(ot) do
     local c = count(t)
-    table.insert(lines, string.format("      : %s -> %d", cat, count(t)))
+    table.insert(lines, string.format("%s -> %d", cat, count(t)))
     sum = sum + c
   end
   table.sort(lines)
-  table.insert(lines, string.format("      : %d", sum))
+  table.insert(lines, string.format("total %d", sum))
   log(table.concat(lines, "\n"))
 end
 
@@ -57,7 +58,7 @@ end
 
 local function run(cmd, ...)
   local argv = table.concat({...}, " ")
-  log("   run: %s %s", cmd, argv)
+  log("%s %s", cmd, argv)
   return assert(io.popen(string.format("%s " .. argv, cmd), "r"))
 end
 
@@ -217,7 +218,7 @@ local function parseOpt(t, lu, group, o, tail)
   end
 
   local oo = Option(clist)
-  log("option: %s :: %s -> [%d]", o, ot, oo.clist and #oo.clist or 0)
+  log(" + %s :: %s -> [%d]", o, ot, oo.clist and #oo.clist or 0)
 
   if group then
     t[ot] = t[ot] or {}
@@ -263,7 +264,7 @@ local function optionList()
       end
       -- af/vf aliases
       for _,variant in pairs(p.clist) do
-        log(" alias: %s -> %s", variant, stem)
+        log("alias %s -> %s", variant, stem)
         no[variant] = alter
       end
       no[stem] = alter
