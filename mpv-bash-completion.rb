@@ -3,7 +3,6 @@ class MpvBashCompletion < Formula
   homepage "https://github.com/2ion/mpv-bash-completion"
   head "https://github.com/2ion/mpv-bash-completion.git"
 
-  depends_on :x11
   depends_on "mpv"
   depends_on "lua"
   depends_on "bash"
