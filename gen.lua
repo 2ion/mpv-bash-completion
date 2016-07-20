@@ -393,7 +393,6 @@ _mpv_objarg(){
       for q in ${_mpv_pargs[$k]}; do
         if [[ $q =~ ^${f} ]]; then
           r="${r}${p%=*}=${q} "
-          echo ".$r" >> DEBUG
         fi
       done
     fi
