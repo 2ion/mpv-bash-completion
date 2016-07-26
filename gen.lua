@@ -264,8 +264,9 @@ local function optionList()
       local alter = t.Object[stem.."-defaults"]
       -- filter argument detection
       for _,e in ipairs(alter.clist) do
-        if not fargs[e] then
-          fargs[e] = getAVFilterArgs2(stem, e)
+        fargs[stem] = fargs[stem] or {}
+        if not fargs[stem][e] then
+          fargs[stem][e] = getAVFilterArgs2(stem, e)
         end
       end
       -- af/vf aliases
@@ -279,8 +280,9 @@ local function optionList()
     end
     if o:match("^[av]o") and p.clist then
       for _,e in ipairs(p.clist) do
+        fargs[o] = fargs[o] or {}
         if not fargs[e] then
-          fargs[e] = getAVFilterArgs2(o, e)
+          fargs[o][e] = getAVFilterArgs2(o, e)
         end
       end
     end
@@ -311,26 +313,25 @@ local function createScript(olist)
   end
 
   i([[#!/bin/bash
-# mpv(1) Bash completion
-# Generated for mpv ]]..MPV_VERSION)
+# mpv ]]..MPV_VERSION)
 
   i([[### LOOKUP TABLES AND CACHES ###
-_mpv_xrandr_cache=""
+declare _mpv_xrandr_cache
 declare -A _mpv_fargs
 declare -A _mpv_pargs]])
   local fargs = getmetatable(olist).fargs
-  for f,v in pairs(fargs) do
-    local flist = table.concat(keys(v), "= ")
-    if #flist > 0 then
-      flist = flist.."="
-      i(string.format([[_mpv_fargs[%s]="%s"]], f, flist))
-    end
-  end
-  for f,v in pairs(fargs) do
-    for p,w in pairs(v) do
-      local plist = w.clist and table.concat(w.clist, " ") or ""
+  for o,fv in pairs(fargs) do
+    for f,pv in pairs(fv) do
+      local plist = table.concat(keys(pv), "= ")
       if #plist > 0 then
-        i(string.format([[_mpv_pargs[%s@%s]="%s"]], f, p, plist))
+        plist = plist.."="
+        i(string.format([[_mpv_fargs[%s@%s]="%s"]], o, f, plist))
+      end
+      for p,pa in pairs(pv) do
+        plist = pa.clist and table.concat(pa.clist, " ") or ""
+        if #plist > 0 then
+          i(string.format([[_mpv_pargs[%s@%s@%s]="%s"]], o, f, p, plist ))
+        end
       end
     end
   end
@@ -362,8 +363,8 @@ _mpv_s(){
   COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
 }
 _mpv_objarg(){
-  local p=$1 r s t k f
-  shift
+  local prev=${1#--} p=$2 r s t k f
+  shift 2
   # Parameter arguments I:
   # All available parameters
   if [[ $p =~ : && $p =~ =$ ]]; then
@@ -374,7 +375,7 @@ _mpv_objarg(){
     t=${p%=}
     t=${t##*:}
     # index key
-    k="$s@$t"
+    k="$prev@$s@$t"
     if [[ ${_mpv_pargs[$k]+x} ]]; then
       for q in ${_mpv_pargs[$k]}; do
         r="${r}${p}${q} "
@@ -392,7 +393,7 @@ _mpv_objarg(){
     t=${t##*:}
     t=${t%%=*}
     # index key
-    k="$s@$t"
+    k="$prev@$s@$t"
     # fragment
     f=${p##*=}
     if [[ ${_mpv_pargs[$k]+x} ]]; then
@@ -409,7 +410,9 @@ _mpv_objarg(){
     # current filter
     s=${p##*,}
     s=${s%%:*}
-    for q in ${_mpv_fargs[$s]}; do
+    # index key
+    k="$prev@$s"
+    for q in ${_mpv_fargs[$k]}; do
       r="${r}${p}${q} "
     done
 
@@ -420,7 +423,9 @@ _mpv_objarg(){
     s=${s%%:*}
     # current argument
     t=${p##*:}
-    for q in ${_mpv_fargs[$s]}; do
+    # index key
+    k="$prev@$s"
+    for q in ${_mpv_fargs[$k]}; do
       if [[ $q =~ ^${t} ]]; then
         r="${r}${p%:*}:${q} "
       fi
@@ -473,7 +478,7 @@ _mpv(){
   i("if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case \"$prev\" in")
   for o,p in ofType("Object") do
     if o:match("^[av][fo]") then
-      i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
+      i(string.format([[--%s)_mpv_s "$(_mpv_objarg "$prev" "$cur" %s)" "$cur";return;;]],
         o, p.clist and table.concat(p.clist, " ") or ""))
     end
   end
