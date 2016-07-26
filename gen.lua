@@ -264,10 +264,8 @@ local function optionList()
       local alter = t.Object[stem.."-defaults"]
       -- filter argument detection
       for _,e in ipairs(alter.clist) do
-        fargs[stem] = fargs[stem] or {}
-        if not fargs[stem][e] then
-          fargs[stem][e] = getAVFilterArgs2(stem, e)
-        end
+        if not fargs[stem] then fargs[stem] = {} end
+        if not fargs[stem][e] then fargs[stem][e] = getAVFilterArgs2(stem, e) end
       end
       -- af/vf aliases
       for _,variant in pairs(p.clist) do
@@ -280,10 +278,8 @@ local function optionList()
     end
     if o:match("^[av]o") and p.clist then
       for _,e in ipairs(p.clist) do
-        fargs[o] = fargs[o] or {}
-        if not fargs[e] then
-          fargs[o][e] = getAVFilterArgs2(o, e)
-        end
+        if not fargs[o]    then fargs[o] = {} end
+        if not fargs[o][e] then fargs[o][e] = getAVFilterArgs2(o, e) end
       end
     end
   end
