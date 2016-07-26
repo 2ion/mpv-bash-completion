@@ -210,7 +210,13 @@ local function parseOpt(t, lu, group, o, tail)
                                  ot = "String"
   elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
                                  ot = "Position"
-  elseif ot == "String"     then if wantsFile(tail) then ot = "File" else clist = { extractDefault(tail) } end
+  elseif ot == "String"     then if wantsFile(tail) then
+                                   ot = "File"
+                                 elseif string.match(o, 'directory') then
+                                   ot = "Directory"
+                                 else
+                                   clist = { extractDefault(tail) }
+                                 end
   elseif ot == "Time"       then clist = { "00:00:00" }
   elseif ot == "Window"     then ot = "Dimen"
   else
@@ -374,7 +380,7 @@ _mpv_objarg(){
         r="${r}${p}${q} "
       done
     fi
-  
+
   # Parameter arguments II:
   # Fragment completion
   elif [[ ${p##*,} =~ : && ${p##*:} =~ = ]]; then
@@ -419,7 +425,7 @@ _mpv_objarg(){
         r="${r}${p%:*}:${q} "
       fi
     done
-  
+
   # Filter list I:
   # All available filters
   elif [[ $p =~ ,$ ]]; then
@@ -476,6 +482,12 @@ _mpv(){
   i("if [[ -n $prev ]]; then case \"$prev\" in")
   i(string.format("%s)_filedir;return;;",
     mapcator(keys(olist.File), function (e)
+      local o = string.format("--%s", e)
+      table.insert(all, o)
+      return o
+    end)))
+  i(string.format("%s)_filedir -d;return;;",
+    mapcator(keys(olist.Directory), function (e)
       local o = string.format("--%s", e)
       table.insert(all, o)
       return o
