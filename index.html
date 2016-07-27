@@ -36,46 +36,32 @@ lists,</li>
 <li>Regular file name completion.</li>
 </ul>
 
-<p>It does so by parsing the output of</p>
-
-<pre><code>mpv --list-options
-</code></pre>
-
-<p>directly and should thus work against all recent versions of mpv, though
-the only support version is the current mpv release.</p>
-
-<p>We support installation methods for the following platforms:</p>
+<h2>
+<a id="supported-oss" class="anchor" href="#supported-oss" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Supported OSs</h2>
 
 <ul>
 <li><a href="#arch-linux">Arch Linux</a></li>
 <li><a href="#debian">Debian Jessie/Testing/Unstable + Ubuntu 16.04 Xenial</a></li>
-<li><a href="#osx-homebrew">OSX Homebrew</a></li>
-<li><a href="#platform-agnostic-method">Generic Linux/OSX/Unix</a></li>
+<li><a href="https://packages.gentoo.org/packages/app-shells/mpv-bash-completion">Gentoo Linux, Funtoo Linux</a></li>
+<li><a href="#osx-homebrew">OS X Homebrew</a></li>
+<li><a href="#platform-agnostic-method">Generic Linux/OSX/Unix systems</a></li>
 </ul>
-
-<p>The following platforms are supported by a third party:</p>
-
-<ul>
-<li>Gentoo Linux, by extension also Funtoo Linux: <a href="https://packages.gentoo.org/packages/app-shells/mpv-bash-completion">app-shells/mpv-bash-completion</a>
-</li>
-</ul>
-
-<p>See below for details.</p>
 
 <h2>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h2>
 
 <ul>
-<li>Bash 4 (OSX users need to install it from homebrew or macports)</li>
+<li>Bash 4</li>
 <li>Lua 5.1, 5.2 or 5.3 as well as LuaJIT</li>
-<li>mpv</li>
+<li>mpv &gt;= 0.14</li>
 </ul>
 
-<p>Optionally:</p>
+<h3>
+<a id="optional-dependencies" class="anchor" href="#optional-dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Optional dependencies</h3>
 
 <ul>
-<li>xrandr: dynamic resolution detection and substitution under X11 and
-xwayland</li>
+<li>xrandr: for dynamic resolution detection and completion under X11
+and xwayland</li>
 </ul>
 
 <h2>
@@ -87,16 +73,12 @@ of the supported platforms.</p>
 <h3>
 <a id="platform-agnostic-method" class="anchor" href="#platform-agnostic-method" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Platform-agnostic method</h3>
 
-<p>Just execute</p>
-
 <div class="highlight highlight-source-shell"><pre><span class="pl-c"># You may set the following environment variables beforehand:</span>
 <span class="pl-c"># export MPV_BASHCOMPGEN_VERBOSE=1 # verbose debug/progress output</span>
 <span class="pl-c"># export MPV_BASHCOMPGEN_MPV_CMD=mpv # path or command to execute mpv, defaults to 'mpv'</span>
-<span class="pl-c"># export MPV_BASHCOMPGEN_VERBOSE=foo # override version tag in the output file</span>
 
-./gen.lua <span class="pl-k">&gt;</span> mpv.sh</pre></div>
-
-<p>and source the resulting file into Bash.</p>
+./gen.lua <span class="pl-k">&gt;</span> mpv.sh
+<span class="pl-c1">source</span> ./mpv.sh</pre></div>
 
 <h3>
 <a id="arch-linux" class="anchor" href="#arch-linux" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Arch Linux</h3>
@@ -105,8 +87,6 @@ of the supported platforms.</p>
 from the AUR. It will install all necessary dependencies and also ships
 a pacman hook which automatically rebuilds the completion file whenever
 you update mpv so it's <strong>not</strong> necessary to install the package every time.</p>
-
-<p>The PKGBUILD lives on the <a href="https://github.com/2ion/mpv-bash-completion/tree/aur4"><code>aur4</code></a> branch.</p>
 
 <h3>
 <a id="debian" class="anchor" href="#debian" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Debian</h3>
