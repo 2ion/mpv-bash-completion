@@ -15,36 +15,24 @@ It features...
 * Similarly, parameter completion for video and audio outputs (--vo, --ao),
 * Regular file name completion.
 
-It does so by parsing the output of
-```
-mpv --list-options
-```
-directly and should thus work against all recent versions of mpv, though
-the only support version is the current mpv release.
-
-We support installation methods for the following platforms:
+## Supported OSs
 
 * [Arch Linux](#arch-linux)
 * [Debian Jessie/Testing/Unstable + Ubuntu 16.04 Xenial](#debian)
-* [OSX Homebrew](#osx-homebrew)
-* [Generic Linux/OSX/Unix](#platform-agnostic-method)
-
-The following platforms are supported by a third party:
-
-* Gentoo Linux, by extension also Funtoo Linux: [app-shells/mpv-bash-completion](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion)
-
-See below for details.
+* [Gentoo Linux, Funtoo Linux](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion)
+* [OS X Homebrew](#osx-homebrew)
+* [Generic Linux/OSX/Unix systems](#platform-agnostic-method)
 
 ## Dependencies
 
-* Bash 4 (OSX users need to install it from homebrew or macports)
+* Bash 4
 * Lua 5.1, 5.2 or 5.3 as well as LuaJIT
-* mpv
+* mpv >= 0.14
 
-Optionally:
+### Optional dependencies
 
-* xrandr: dynamic resolution detection and substitution under X11 and
-  xwayland
+* xrandr: for dynamic resolution detection and completion under X11
+  and xwayland
 
 ## Installation
 
@@ -53,15 +41,14 @@ of the supported platforms.
 
 ### Platform-agnostic method
 
-Just execute
 ```sh
 # You may set the following environment variables beforehand:
 # export MPV_BASHCOMPGEN_VERBOSE=1 # verbose debug/progress output
 # export MPV_BASHCOMPGEN_MPV_CMD=mpv # path or command to execute mpv, defaults to 'mpv'
 
 ./gen.lua > mpv.sh
+source ./mpv.sh
 ```
-and source the resulting file into Bash.
 
 ### Arch Linux
 
@@ -69,8 +56,6 @@ Install [mpv-bash-completion-git](https://aur.archlinux.org/packages/mpv-bash-co
 from the AUR. It will install all necessary dependencies and also ships
 a pacman hook which automatically rebuilds the completion file whenever
 you update mpv so it's **not** necessary to install the package every time.
-
-The PKGBUILD lives on the [`aur4`](https://github.com/2ion/mpv-bash-completion/tree/aur4) branch.
 
 ### Debian
 
