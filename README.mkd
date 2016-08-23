@@ -19,7 +19,7 @@ It features...
 
 * [Arch Linux](#arch-linux)
 * [Debian Jessie/Testing/Unstable + Ubuntu 16.04 Xenial](#debian)
-* [Gentoo Linux, Funtoo Linux](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion)
+* Gentoo Linux, Funtoo Linux: [app-shells/mpv-bash-completion](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion)
 * [OS X Homebrew](#osx-homebrew)
 * [Generic Linux/OSX/Unix systems](#platform-agnostic-method)
 
@@ -33,6 +33,16 @@ It features...
 
 * xrandr: for dynamic resolution detection and completion under X11
   and xwayland
+
+
+### Supporting inputrc configuration
+
+We recommend the following setting for a snappier completion experience:
+To the file `~/.inputrc`, add the line
+```
+set show-all-if-ambiguous on
+```
+Launch a new shell to use the setting.
 
 ## Installation
 
