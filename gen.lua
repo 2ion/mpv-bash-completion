@@ -150,7 +150,7 @@ local function expandObject(o)
   local h = mpv(string.format("--%s help", o))
   local clist = {}
   for l in h:lines() do
-    local m = l:match("^%s%s(%S+)")
+    local m = l:match("^%s+([%S.]+)")
     if m then table.insert(clist, m) end
   end
   h:close()
@@ -204,6 +204,11 @@ end
 local function parseOpt(t, lu, group, o, tail)
   local ot = tail:match("(%S+)")
   local clist = nil
+
+  -- Overrides for wrongly option type labels
+  if oneOf(o, "opengl-backend", "profile") then
+    ot = "Object"
+  end
 
   if oneOf(ot, "Integer", "Double", "Float", "Integer64")
                             then clist = { extractDefault(tail), extractRange(tail) }
