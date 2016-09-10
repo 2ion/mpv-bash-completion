@@ -104,8 +104,10 @@ end
 
 local function keys(t)
   local u = {}
-  for k,_ in pairs(t) do
-    table.insert(u, k)
+  if t then
+    for k,_ in pairs(t) do
+      table.insert(u, k)
+    end
   end
   return u
 end
@@ -256,34 +258,39 @@ local function optionList()
 
   h:close()
 
-  local no = {}
   local fargs = {}
-  for o,p in pairs(t.Object) do
-    if o:sub(-1) == "*" then
-      local stem = o:sub(1, -2)
-      local alter = t.Object[stem.."-defaults"]
-      -- filter argument detection
-      for _,e in ipairs(alter.clist) do
-        if not fargs[stem] then fargs[stem] = {} end
-        if not fargs[stem][e] then fargs[stem][e] = getAVFilterArgs2(stem, e) end
+
+  -- Not present anymore in very recent git HEADs. Let's keep this
+  -- around for a while.
+  if t.Object then
+    local no = {}
+    for o,p in pairs(t.Object) do
+      if o:sub(-1) == "*" then
+        local stem = o:sub(1, -2)
+        local alter = t.Object[stem.."-defaults"]
+        -- filter argument detection
+        for _,e in ipairs(alter.clist) do
+          if not fargs[stem] then fargs[stem] = {} end
+          if not fargs[stem][e] then fargs[stem][e] = getAVFilterArgs2(stem, e) end
+        end
+        -- af/vf aliases
+        for _,variant in pairs(p.clist) do
+          log("alias %s -> %s", variant, stem)
+          no[variant] = alter
+        end
+        no[stem] = alter
+      else
+        no[o] = p
       end
-      -- af/vf aliases
-      for _,variant in pairs(p.clist) do
-        log("alias %s -> %s", variant, stem)
-        no[variant] = alter
+      if o:match("^[av]o") and p.clist then
+        for _,e in ipairs(p.clist) do
+          if not fargs[o]    then fargs[o] = {} end
+          if not fargs[o][e] then fargs[o][e] = getAVFilterArgs2(o, e) end
+        end
       end
-      no[stem] = alter
-    else
-      no[o] = p
     end
-    if o:match("^[av]o") and p.clist then
-      for _,e in ipairs(p.clist) do
-        if not fargs[o]    then fargs[o] = {} end
-        if not fargs[o][e] then fargs[o][e] = getAVFilterArgs2(o, e) end
-      end
-    end
+    t.Object = no
   end
-  t.Object = no
   setmetatable(t, { fargs = fargs })
 
   return t
@@ -295,8 +302,10 @@ local function createScript(olist)
   local function ofType(...)
     local t = {}
     for _,k in ipairs{...} do
-      for u,v in pairs(olist[k]) do
-        t[u] = v
+      if olist[k] then
+        for u,v in pairs(olist[k]) do
+          t[u] = v
+        end
       end
     end
     return pairs(t)
