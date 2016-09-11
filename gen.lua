@@ -66,18 +66,6 @@ local function mpv(...)
   return run(MPV_CMD, "--no-config", ...)
 end
 
-local function supports_option(omatch)
-  local h = mpv("--help")
-  for l in h:lines() do
-    if l:match(omatch) then
-      h:close()
-      return true
-    end
-  end
-  h:close()
-  return false
-end
-
 local function assert_read(h, w)
   return assert(h:read(w or "*all"), "can't read from file handle: no data")
 end
@@ -266,13 +254,7 @@ end
 
 local function optionList()
   local t = {}
-  local h = nil
-
-  if supports_option("-h=") then
-    h = mpv("-h=*")
-  else
-    h = mpv("--list-options")
-  end
+  local h = mpv("--list-options")
 
   for s in h:lines() do
     local o, s= s:match("^ %-%-(%S+)%s+(%S.*)")
