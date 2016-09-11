@@ -104,8 +104,10 @@ end
 
 local function keys(t)
   local u = {}
-  for k,_ in pairs(t) do
-    table.insert(u, k)
+  if t then
+    for k,_ in pairs(t) do
+      table.insert(u, k)
+    end
   end
   return u
 end
@@ -136,7 +138,7 @@ local function expandObject(o)
   local h = mpv(string.format("--%s help", o))
   local clist = {}
   for l in h:lines() do
-    local m = l:match("^%s%s(%S+)")
+    local m = l:match("^%s+([%S.]+)")
     if m then table.insert(clist, m) end
   end
   h:close()
@@ -191,6 +193,11 @@ local function parseOpt(t, lu, group, o, tail)
   local ot = tail:match("(%S+)")
   local clist = nil
 
+  -- Overrides for wrongly option type labels
+  if oneOf(o, "opengl-backend", "profile") then
+    ot = "Object"
+  end
+
   if oneOf(ot, "Integer", "Double", "Float", "Integer64")
                             then clist = { extractDefault(tail), extractRange(tail) }
                                  ot = "Numeric"
@@ -210,7 +217,13 @@ local function parseOpt(t, lu, group, o, tail)
                                  ot = "String"
   elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
                                  ot = "Position"
-  elseif ot == "String"     then if wantsFile(tail) then ot = "File" else clist = { extractDefault(tail) } end
+  elseif ot == "String"     then if wantsFile(tail) then
+                                   ot = "File"
+                                 elseif string.match(o, 'directory') then
+                                   ot = "Directory"
+                                 else
+                                   clist = { extractDefault(tail) }
+                                 end
   elseif ot == "Time"       then clist = { "00:00:00" }
   elseif ot == "Window"     then ot = "Dimen"
   else
@@ -250,36 +263,39 @@ local function optionList()
 
   h:close()
 
-  local no = {}
   local fargs = {}
-  for o,p in pairs(t.Object) do
-    if o:sub(-1) == "*" then
-      local stem = o:sub(1, -2)
-      local alter = t.Object[stem.."-defaults"]
-      -- filter argument detection
-      for _,e in ipairs(alter.clist) do
-        if not fargs[e] then
-          fargs[e] = getAVFilterArgs2(stem, e)
+
+  -- Not present anymore in very recent git HEADs. Let's keep this
+  -- around for a while.
+  if t.Object then
+    local no = {}
+    for o,p in pairs(t.Object) do
+      if o:sub(-1) == "*" then
+        local stem = o:sub(1, -2)
+        local alter = t.Object[stem.."-defaults"]
+        -- filter argument detection
+        for _,e in ipairs(alter.clist) do
+          if not fargs[stem] then fargs[stem] = {} end
+          if not fargs[stem][e] then fargs[stem][e] = getAVFilterArgs2(stem, e) end
+        end
+        -- af/vf aliases
+        for _,variant in pairs(p.clist) do
+          log("alias %s -> %s", variant, stem)
+          no[variant] = alter
+        end
+        no[stem] = alter
+      else
+        no[o] = p
+      end
+      if o:match("^[av]o") and p.clist then
+        for _,e in ipairs(p.clist) do
+          if not fargs[o]    then fargs[o] = {} end
+          if not fargs[o][e] then fargs[o][e] = getAVFilterArgs2(o, e) end
         end
       end
-      -- af/vf aliases
-      for _,variant in pairs(p.clist) do
-        log("alias %s -> %s", variant, stem)
-        no[variant] = alter
-      end
-      no[stem] = alter
-    else
-      no[o] = p
     end
-    if o:match("^[av]o") and p.clist then
-      for _,e in ipairs(p.clist) do
-        if not fargs[e] then
-          fargs[e] = getAVFilterArgs2(o, e)
-        end
-      end
-    end
+    t.Object = no
   end
-  t.Object = no
   setmetatable(t, { fargs = fargs })
 
   return t
@@ -291,8 +307,10 @@ local function createScript(olist)
   local function ofType(...)
     local t = {}
     for _,k in ipairs{...} do
-      for u,v in pairs(olist[k]) do
-        t[u] = v
+      if olist[k] then
+        for u,v in pairs(olist[k]) do
+          t[u] = v
+        end
       end
     end
     return pairs(t)
@@ -305,26 +323,25 @@ local function createScript(olist)
   end
 
   i([[#!/bin/bash
-# mpv(1) Bash completion
-# Generated for mpv ]]..MPV_VERSION)
+# mpv ]]..MPV_VERSION)
 
   i([[### LOOKUP TABLES AND CACHES ###
-_mpv_xrandr_cache=""
+declare _mpv_xrandr_cache
 declare -A _mpv_fargs
 declare -A _mpv_pargs]])
   local fargs = getmetatable(olist).fargs
-  for f,v in pairs(fargs) do
-    local flist = table.concat(keys(v), "= ")
-    if #flist > 0 then
-      flist = flist.."="
-      i(string.format([[_mpv_fargs[%s]="%s"]], f, flist))
-    end
-  end
-  for f,v in pairs(fargs) do
-    for p,w in pairs(v) do
-      local plist = w.clist and table.concat(w.clist, " ") or ""
+  for o,fv in pairs(fargs) do
+    for f,pv in pairs(fv) do
+      local plist = table.concat(keys(pv), "= ")
       if #plist > 0 then
-        i(string.format([[_mpv_pargs[%s@%s]="%s"]], f, p, plist))
+        plist = plist.."="
+        i(string.format([[_mpv_fargs[%s@%s]="%s"]], o, f, plist))
+      end
+      for p,pa in pairs(pv) do
+        plist = pa.clist and table.concat(pa.clist, " ") or ""
+        if #plist > 0 then
+          i(string.format([[_mpv_pargs[%s@%s@%s]="%s"]], o, f, p, plist ))
+        end
       end
     end
   end
@@ -356,8 +373,8 @@ _mpv_s(){
   COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
 }
 _mpv_objarg(){
-  local p=$1 r s t k f
-  shift
+  local prev=${1#--} p=$2 r s t k f
+  shift 2
   # Parameter arguments I:
   # All available parameters
   if [[ $p =~ : && $p =~ =$ ]]; then
@@ -368,13 +385,13 @@ _mpv_objarg(){
     t=${p%=}
     t=${t##*:}
     # index key
-    k="$s@$t"
+    k="$prev@$s@$t"
     if [[ ${_mpv_pargs[$k]+x} ]]; then
       for q in ${_mpv_pargs[$k]}; do
         r="${r}${p}${q} "
       done
     fi
-  
+
   # Parameter arguments II:
   # Fragment completion
   elif [[ ${p##*,} =~ : && ${p##*:} =~ = ]]; then
@@ -386,14 +403,13 @@ _mpv_objarg(){
     t=${t##*:}
     t=${t%%=*}
     # index key
-    k="$s@$t"
+    k="$prev@$s@$t"
     # fragment
     f=${p##*=}
     if [[ ${_mpv_pargs[$k]+x} ]]; then
       for q in ${_mpv_pargs[$k]}; do
         if [[ $q =~ ^${f} ]]; then
           r="${r}${p%=*}=${q} "
-          echo ".$r" >> DEBUG
         fi
       done
     fi
@@ -404,7 +420,9 @@ _mpv_objarg(){
     # current filter
     s=${p##*,}
     s=${s%%:*}
-    for q in ${_mpv_fargs[$s]}; do
+    # index key
+    k="$prev@$s"
+    for q in ${_mpv_fargs[$k]}; do
       r="${r}${p}${q} "
     done
 
@@ -415,12 +433,14 @@ _mpv_objarg(){
     s=${s%%:*}
     # current argument
     t=${p##*:}
-    for q in ${_mpv_fargs[$s]}; do
+    # index key
+    k="$prev@$s"
+    for q in ${_mpv_fargs[$k]}; do
       if [[ $q =~ ^${t} ]]; then
         r="${r}${p%:*}:${q} "
       fi
     done
-  
+
   # Filter list I:
   # All available filters
   elif [[ $p =~ ,$ ]]; then
@@ -468,7 +488,7 @@ _mpv(){
   i("if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case \"$prev\" in")
   for o,p in ofType("Object") do
     if o:match("^[av][fo]") then
-      i(string.format("--%s)_mpv_s \"$(_mpv_objarg \"$cur\" %s)\" \"$cur\";return;;",
+      i(string.format([[--%s)_mpv_s "$(_mpv_objarg "$prev" "$cur" %s)" "$cur";return;;]],
         o, p.clist and table.concat(p.clist, " ") or ""))
     end
   end
@@ -477,6 +497,12 @@ _mpv(){
   i("if [[ -n $prev ]]; then case \"$prev\" in")
   i(string.format("%s)_filedir;return;;",
     mapcator(keys(olist.File), function (e)
+      local o = string.format("--%s", e)
+      table.insert(all, o)
+      return o
+    end)))
+  i(string.format("%s)_filedir -d;return;;",
+    mapcator(keys(olist.Directory), function (e)
       local o = string.format("--%s", e)
       table.insert(all, o)
       return o
