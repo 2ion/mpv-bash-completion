@@ -42,7 +42,8 @@ lists,</li>
 <ul>
 <li><a href="#arch-linux">Arch Linux</a></li>
 <li><a href="#debian">Debian Jessie/Testing/Unstable + Ubuntu 16.04 Xenial</a></li>
-<li><a href="https://packages.gentoo.org/packages/app-shells/mpv-bash-completion">Gentoo Linux, Funtoo Linux</a></li>
+<li>Gentoo Linux, Funtoo Linux: <a href="https://packages.gentoo.org/packages/app-shells/mpv-bash-completion">app-shells/mpv-bash-completion</a>
+</li>
 <li><a href="#osx-homebrew">OS X Homebrew</a></li>
 <li><a href="#platform-agnostic-method">Generic Linux/OSX/Unix systems</a></li>
 </ul>
@@ -52,7 +53,7 @@ lists,</li>
 
 <ul>
 <li>Bash 4</li>
-<li>Lua 5.1, 5.2 or 5.3 as well as LuaJIT</li>
+<li>Lua 5.1 or 5.2 or 5.3 or LuaJIT</li>
 <li>mpv &gt;= 0.14</li>
 </ul>
 
@@ -63,6 +64,17 @@ lists,</li>
 <li>xrandr: for dynamic resolution detection and completion under X11
 and xwayland</li>
 </ul>
+
+<h3>
+<a id="supporting-inputrc-configuration" class="anchor" href="#supporting-inputrc-configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Supporting inputrc configuration</h3>
+
+<p>We recommend the following setting for a snappier completion experience:
+To the file <code>~/.inputrc</code>, add the line</p>
+
+<pre><code>set show-all-if-ambiguous on
+</code></pre>
+
+<p>Launch a new shell to use the setting.</p>
 
 <h2>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
