@@ -15,10 +15,10 @@ local MPV_CMD     = os.getenv("MPV_BASHCOMPGEN_MPV_CMD") or "mpv"
 local MPV_VERSION = "unknown"
 local LOOKUP      = nil
 
------------------------------------------------------------------------
-
 if _VERSION == "Lua 5.1" then table.unpack = unpack end
 
+-----------------------------------------------------------------------
+-- Shell and stdio ops
 -----------------------------------------------------------------------
 
 local function log(s, ...)
@@ -50,8 +50,6 @@ local function debug_categories(ot)
   log(table.concat(lines, "\n"))
 end
 
------------------------------------------------------------------------
-
 local function basename(s)
   return s:match("^.-([^/]+)$")
 end
@@ -70,6 +68,8 @@ local function assert_read(h, w)
   return assert(h:read(w or "*all"), "can't read from file handle: no data")
 end
 
+-----------------------------------------------------------------------
+-- Table ops
 -----------------------------------------------------------------------
 
 local function oneOf(n, ...)
@@ -113,6 +113,8 @@ local function keys(t)
 end
 
 -----------------------------------------------------------------------
+-- Data types
+-----------------------------------------------------------------------
 
 local Option = setmetatable({}, {
   __call = function (t, clist)
@@ -124,6 +126,8 @@ local Option = setmetatable({}, {
   end
 })
 
+-----------------------------------------------------------------------
+-- Option processing
 -----------------------------------------------------------------------
 
 local function getMpvVersion()
@@ -531,6 +535,10 @@ _mpv(){
   i("}", "complete -o nospace -F _mpv "..basename(MPV_CMD))
   return table.concat(lines, "\n")
 end
+
+-----------------------------------------------------------------------
+-- Entry point
+-----------------------------------------------------------------------
 
 local function main()
   MPV_VERSION = getMpvVersion()
