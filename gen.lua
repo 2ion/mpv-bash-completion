@@ -130,6 +130,21 @@ local Option = setmetatable({}, {
 -- Option processing
 -----------------------------------------------------------------------
 
+local function normalize_nums(xs)
+  local xs = xs
+  for i,e in ipairs(xs) do
+    local num = tonumber(e)
+    if num then
+      if e:match('[%.]') and not tostring(num):match('[%.]') then
+        xs[i] = num .. '.0'
+      else
+        xs[i] = num
+      end
+    end
+  end
+  return unique(xs)
+end
+
 local function getMpvVersion()
   local h = mpv("--version")
   local s = assert_read(h, "*line")
