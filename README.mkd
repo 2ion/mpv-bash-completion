@@ -23,6 +23,11 @@ It features...
 * [OS X Homebrew](#osx-homebrew)
 * [Generic Linux/OSX/Unix systems](#platform-agnostic-method)
 
+## Source code
+
+The main repository is on [Github](https://github.com/2ion/mpv-bash-completion).
+Tarballs of tagged releases can be downloaded [here](https://github.com/2ion/mpv-bash-completion/releases).
+
 ## Dependencies
 
 * Bash 4
@@ -33,7 +38,6 @@ It features...
 
 * xrandr: for dynamic resolution detection and completion under X11
   and xwayland
-
 
 ### Supporting inputrc configuration
 
