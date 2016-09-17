@@ -26,6 +26,11 @@ It features...
 ## Source code
 
 The main repository is on [Github](https://github.com/2ion/mpv-bash-completion).
+
+```
+git clone https://github.com/2ion/mpv-bash-completion.git
+```
+
 Tarballs of tagged releases can be downloaded [here](https://github.com/2ion/mpv-bash-completion/releases).
 
 ## Dependencies
