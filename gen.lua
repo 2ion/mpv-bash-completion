@@ -500,15 +500,15 @@ _mpv(){
     end
   })
 
-  i("if [[ -n $cur ]]; then case \"$cur\" in")
+  i([=[if [[ -n $cur ]]; then case "$cur" in]=])
   for o,p in ofType("Choice", "Flag") do
-    i(string.format("--%s=*)_mpv_s \"%s\" \"$cur\";return;;",
+    i(string.format([[--%s=*)_mpv_s '%s' "$cur"; return;;]],
         o, mapcats(p.clist, function (e) return string.format("--%s=%s", o, e) end)))
     table.insert(all, string.format("--%s=", o))
   end
   i("esac; fi")
 
-  i("if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case \"$prev\" in")
+  i([=[if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case "$prev" in]=])
   for o,p in ofType("Object") do
     if o:match("^[av][fo]") then
       i(string.format([[--%s)_mpv_s "$(_mpv_objarg "$prev" "$cur" %s)" "$cur";return;;]],
@@ -517,7 +517,7 @@ _mpv(){
   end
   i("esac; fi")
 
-  i("if [[ -n $prev ]]; then case \"$prev\" in")
+  i([=[if [[ -n $prev ]]; then case "$prev" in]=])
   i(string.format("%s)_filedir;return;;",
     mapcator(keys(olist.File), function (e)
       local o = string.format("--%s", e)
@@ -533,7 +533,7 @@ _mpv(){
   for o, p in ofType("Object", "Numeric", "Audio", "Color", "FourCC", "Image",
     "String", "Position", "Time") do
     if p.clist then table.sort(p.clist) end
-    i(string.format("--%s)_mpv_s \"%s\" \"$cur\";return;;",
+    i(string.format([[--%s)_mpv_s '%s' "$cur"; return;;]],
       o, p.clist and table.concat(p.clist, " ") or ""))
     all(o)
   end
@@ -545,7 +545,7 @@ _mpv(){
 
   i("if [[ $cur =~ ^- ]]; then")
   for o,_ in ofType("Single") do all(o) end
-  i(string.format("_mpv_s \"%s\" \"$cur\"; return;",
+  i(string.format([[_mpv_s '%s' "$cur"; return;]],
     table.concat(all, " ")))
   i("fi")
 
