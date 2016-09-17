@@ -113,37 +113,41 @@ local function keys(t)
 end
 
 -----------------------------------------------------------------------
--- Data types
+-- Option processing
 -----------------------------------------------------------------------
+
+local function normalize_nums(xs)
+  local xs = xs
+  for i=#xs,1,-1 do
+    local e = xs[i]
+    local n = tonumber(e)
+    if n then
+      -- [ 1.0 1 -1.0 -1 ] -> [ 1.0 -1.0 ]
+      if e:match("%.0") then
+        for j=#xs,1,-1 do
+          if i ~= j then
+            local k = tonumber(xs[j])
+            if k and k == n then table.remove(xs, j) end
+          end
+        end
+      end
+      -- [ 1.000000 ] -> [ 1.0 ]
+      xs[i] = tostring(n)
+    end
+  end
+  return xs
+end
 
 local Option = setmetatable({}, {
   __call = function (t, clist)
     local o = {}
     if type(clist)=="table" and #clist > 0 then
       o.clist = unique(clist)
+      o.clist = normalize_nums(o.clist)
     end
     return setmetatable(o, { __index = t })
   end
 })
-
------------------------------------------------------------------------
--- Option processing
------------------------------------------------------------------------
-
-local function normalize_nums(xs)
-  local xs = xs
-  for i,e in ipairs(xs) do
-    local num = tonumber(e)
-    if num then
-      if e:match('[%.]') and not tostring(num):match('[%.]') then
-        xs[i] = num .. '.0'
-      else
-        xs[i] = num
-      end
-    end
-  end
-  return unique(xs)
-end
 
 local function getMpvVersion()
   local h = mpv("--version")
