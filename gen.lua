@@ -15,10 +15,10 @@ local MPV_CMD     = os.getenv("MPV_BASHCOMPGEN_MPV_CMD") or "mpv"
 local MPV_VERSION = "unknown"
 local LOOKUP      = nil
 
------------------------------------------------------------------------
-
 if _VERSION == "Lua 5.1" then table.unpack = unpack end
 
+-----------------------------------------------------------------------
+-- Shell and stdio ops
 -----------------------------------------------------------------------
 
 local function log(s, ...)
@@ -50,8 +50,6 @@ local function debug_categories(ot)
   log(table.concat(lines, "\n"))
 end
 
------------------------------------------------------------------------
-
 local function basename(s)
   return s:match("^.-([^/]+)$")
 end
@@ -70,6 +68,15 @@ local function assert_read(h, w)
   return assert(h:read(w or "*all"), "can't read from file handle: no data")
 end
 
+local function bash_escape(s)
+  local h = io.popen(string.format([[bash -c "printf '%%q' '%s'"]], s))
+  local ret = h:read("*all")
+  h:close()
+  return ret
+end
+
+-----------------------------------------------------------------------
+-- Table ops
 -----------------------------------------------------------------------
 
 local function oneOf(n, ...)
@@ -113,18 +120,41 @@ local function keys(t)
 end
 
 -----------------------------------------------------------------------
+-- Option processing
+-----------------------------------------------------------------------
+
+local function normalize_nums(xs)
+  local xs = xs
+  for i=#xs,1,-1 do
+    local e = xs[i]
+    local n = tonumber(e)
+    if n then
+      -- [ 1.0 1 -1.0 -1 ] -> [ 1.0 -1.0 ]
+      if e:match("%.0") then
+        for j=#xs,1,-1 do
+          if i ~= j then
+            local k = tonumber(xs[j])
+            if k and k == n then table.remove(xs, j) end
+          end
+        end
+      end
+      -- [ 1.000000 ] -> [ 1.0 ]
+      xs[i] = tostring(n)
+    end
+  end
+  return xs
+end
 
 local Option = setmetatable({}, {
   __call = function (t, clist)
     local o = {}
     if type(clist)=="table" and #clist > 0 then
       o.clist = unique(clist)
+      o.clist = normalize_nums(o.clist)
     end
     return setmetatable(o, { __index = t })
   end
 })
-
------------------------------------------------------------------------
 
 local function getMpvVersion()
   local h = mpv("--version")
@@ -219,7 +249,7 @@ local function parseOpt(t, lu, group, o, tail)
                                  ot = "Position"
   elseif ot == "String"     then if wantsFile(tail) then
                                    ot = "File"
-                                 elseif string.match(o, 'directory') then
+                                 elseif o:match('directory') or o:match('dir') then
                                    ot = "Directory"
                                  else
                                    clist = { extractDefault(tail) }
@@ -477,15 +507,15 @@ _mpv(){
     end
   })
 
-  i("if [[ -n $cur ]]; then case \"$cur\" in")
+  i([=[if [[ -n $cur ]]; then case "$cur" in]=])
   for o,p in ofType("Choice", "Flag") do
-    i(string.format("--%s=*)_mpv_s \"%s\" \"$cur\";return;;",
+    i(string.format([[--%s=*)_mpv_s '%s' "$cur"; return;;]],
         o, mapcats(p.clist, function (e) return string.format("--%s=%s", o, e) end)))
     table.insert(all, string.format("--%s=", o))
   end
   i("esac; fi")
 
-  i("if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case \"$prev\" in")
+  i([=[if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case "$prev" in]=])
   for o,p in ofType("Object") do
     if o:match("^[av][fo]") then
       i(string.format([[--%s)_mpv_s "$(_mpv_objarg "$prev" "$cur" %s)" "$cur";return;;]],
@@ -494,7 +524,7 @@ _mpv(){
   end
   i("esac; fi")
 
-  i("if [[ -n $prev ]]; then case \"$prev\" in")
+  i([=[if [[ -n $prev ]]; then case "$prev" in]=])
   i(string.format("%s)_filedir;return;;",
     mapcator(keys(olist.File), function (e)
       local o = string.format("--%s", e)
@@ -510,7 +540,7 @@ _mpv(){
   for o, p in ofType("Object", "Numeric", "Audio", "Color", "FourCC", "Image",
     "String", "Position", "Time") do
     if p.clist then table.sort(p.clist) end
-    i(string.format("--%s)_mpv_s \"%s\" \"$cur\";return;;",
+    i(string.format([[--%s)_mpv_s '%s' "$cur"; return;;]],
       o, p.clist and table.concat(p.clist, " ") or ""))
     all(o)
   end
@@ -522,7 +552,7 @@ _mpv(){
 
   i("if [[ $cur =~ ^- ]]; then")
   for o,_ in ofType("Single") do all(o) end
-  i(string.format("_mpv_s \"%s\" \"$cur\"; return;",
+  i(string.format([[_mpv_s '%s' "$cur"; return;]],
     table.concat(all, " ")))
   i("fi")
 
@@ -531,6 +561,10 @@ _mpv(){
   i("}", "complete -o nospace -F _mpv "..basename(MPV_CMD))
   return table.concat(lines, "\n")
 end
+
+-----------------------------------------------------------------------
+-- Entry point
+-----------------------------------------------------------------------
 
 local function main()
   MPV_VERSION = getMpvVersion()
