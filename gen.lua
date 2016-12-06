@@ -261,7 +261,7 @@ local function parseOpt(t, lu, group, o, tail)
   end
 
   local oo = Option(clist)
-  log(" + %s :: %s -> [%d]", o, ot, oo.clist and #oo.clist or 0)
+  log(" + %s :: %s -> [%s]", o, ot, oo.clist and table.concat(oo.clist, " ") or "")
 
   if group then
     t[ot] = t[ot] or {}
@@ -295,8 +295,9 @@ local function optionList()
 
   local fargs = {}
 
-  -- Not present anymore in very recent git HEADs. Let's keep this
+  -- Not fully present anymore in very recent git HEADs. Let's keep this
   -- around for a while.
+  -- Still important is the expansion of --af*/--vf* to --af-add etc
   if t.Object then
     local no = {}
     for o,p in pairs(t.Object) do
@@ -310,8 +311,13 @@ local function optionList()
         end
         -- af/vf aliases
         for _,variant in pairs(p.clist) do
-          log("alias %s -> %s", variant, stem)
-          no[variant] = alter
+          -- Drop stray matches from expandObject(), option description
+          -- text formatting is inconsistent, so this is hard to prevent
+          -- without breaking stuff elsewhere.
+          if variant:match("^[a-z0-9]") then
+            log("alias %s -> %s", variant, stem)
+            no[variant] = alter
+          end
         end
         no[stem] = alter
       else
