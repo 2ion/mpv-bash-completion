@@ -231,7 +231,9 @@ local function parseOpt(t, lu, group, o, tail)
   if oneOf(ot, "Integer", "Double", "Float", "Integer64")
                             then clist = { extractDefault(tail), extractRange(tail) }
                                  ot = "Numeric"
-  elseif ot == "Flag"       then if hasNoCfg(tail) or o:match("^no%-") then ot = "Single"
+  elseif ot == "Flag"       then if hasNoCfg(tail)
+                                    or o:match("^no%-")
+                                    or o:match("^[{}]$") then ot = "Single"
                                  else clist = { "yes", "no", extractDefault(tail) } end
   elseif ot == "Audio"      then clist = { extractDefault(tail), extractRange(tail) }
   elseif ot == "Choices:"   then clist = { extractRange(tail), extractDefault(tail), table.unpack(extractChoices(tail)) }
