@@ -1,3 +1,9 @@
+mpv-bash-completion (3.3.8-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Jens John <dev@2ion.de>  Sat, 21 Jan 2017 15:37:52 +0100
+
 mpv-bash-completion (3.3.6~git1-1) unstable; urgency=low
 
   * New upstream release.
