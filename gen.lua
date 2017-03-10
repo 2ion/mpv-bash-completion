@@ -251,8 +251,9 @@ local function parseOpt(t, lu, group, o, tail)
                                  ot = "Position"
   elseif ot == "String"     then if wantsFile(tail) then
                                    ot = "File"
-                                 elseif o:match('directory') or o:match('dir') then
-                                   ot = "Directory"
+                                   if o:match('directory') or o:match('dir') then
+                                     ot = "Directory"
+                                   end
                                  else
                                    clist = { extractDefault(tail) }
                                  end
