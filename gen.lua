@@ -533,18 +533,22 @@ _mpv(){
   i("esac; fi")
 
   i([=[if [[ -n $prev ]]; then case "$prev" in]=])
-  i(string.format("%s)_filedir;return;;",
-    mapcator(keys(olist.File), function (e)
-      local o = string.format("--%s", e)
-      table.insert(all, o)
-      return o
-    end)))
-  i(string.format("%s)_filedir -d;return;;",
-    mapcator(keys(olist.Directory), function (e)
-      local o = string.format("--%s", e)
-      table.insert(all, o)
-      return o
-    end)))
+  if olist.File then
+    i(string.format("%s)_filedir;return;;",
+      mapcator(keys(olist.File), function (e)
+        local o = string.format("--%s", e)
+        table.insert(all, o)
+        return o
+      end)))
+  end
+  if olist.Directory then
+    i(string.format("%s)_filedir -d;return;;",
+      mapcator(keys(olist.Directory), function (e)
+        local o = string.format("--%s", e)
+        table.insert(all, o)
+        return o
+      end)))
+  end
   for o, p in ofType("Object", "Numeric", "Audio", "Color", "FourCC", "Image",
     "String", "Position", "Time") do
     if p.clist then table.sort(p.clist) end
