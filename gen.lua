@@ -163,13 +163,20 @@ local function getMpvVersion()
   return s:match("^%S+ (%S+)")
 end
 
-
 local function expandObject(o)
   local h = mpv(string.format("--%s help", o))
   local clist = {}
   for l in h:lines() do
     local m = l:match("^%s+([%S.]+)")
-    if m then table.insert(clist, m) end
+    if m then
+      -- oac, ovc special case: filter out --foo=needle
+      local tail = m:match("^--[^=]+=(.*)$")
+      if tail then
+        log(" ! %s :: %s -> %s", o, m, tail)
+        m = tail
+      end
+      table.insert(clist, m)
+    end
   end
   h:close()
   return clist
@@ -225,6 +232,12 @@ local function parseOpt(t, lu, group, o, tail)
 
   -- Overrides for wrongly option type labels
   if oneOf(o, "opengl-backend", "profile") then
+    ot = "Object"
+  end
+
+  -- Override for codec/format listings which are of type String, not
+  -- object
+  if oneOf(o, "ad", "vd", "oac", "ovc") then
     ot = "Object"
   end
 
