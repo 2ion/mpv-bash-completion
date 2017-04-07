@@ -231,8 +231,13 @@ local function parseOpt(t, lu, group, o, tail)
   local clist = nil
 
   -- Overrides for wrongly option type labels
-  if oneOf(o, "opengl-backend", "profile") then
+  if oneOf(o, "opengl-backend") then
     ot = "Object"
+  end
+
+  -- Override for dynamic profile list expansion
+  if oneOf(o, "profile") then
+    ot = "Profile"
   end
 
   -- Override for codec/format listings which are of type String, not
@@ -272,6 +277,7 @@ local function parseOpt(t, lu, group, o, tail)
                                  end
   elseif ot == "Time"       then clist = { "00:00:00" }
   elseif ot == "Window"     then ot = "Dimen"
+  elseif ot == "Profile"    then clist = {}
   else
     ot = "Single"
   end
@@ -409,6 +415,11 @@ _mpv_uniq(){
     fi
   done
   printf "${o% }"
+}
+_mpv_profiles(){
+  type mpv &>/dev/null || return 0;
+  local p=$(mpv --profile help)
+  echo "${p##*:}"
 }
 _mpv_xrandr(){
   if [[ -z "$_mpv_xrandr_cache" && -n "$DISPLAY" ]] && type xrandr &>/dev/null; then
@@ -550,6 +561,14 @@ _mpv(){
   if olist.File then
     i(string.format("%s)_filedir;return;;",
       mapcator(keys(olist.File), function (e)
+        local o = string.format("--%s", e)
+        table.insert(all, o)
+        return o
+      end)))
+  end
+  if olist.Profile then
+    i(string.format([[%s)_mpv_s "$(_mpv_profiles)" "$cur";return;;]],
+      mapcator(keys(olist.Profile), function (e)
         local o = string.format("--%s", e)
         table.insert(all, o)
         return o
