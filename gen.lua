@@ -278,6 +278,11 @@ local function parseOpt(t, lu, group, o, tail)
     ot = "Profile"
   end
 
+  -- Override for dynamic DRM connector list expansion
+  if oneOf(o, "drm-connector") then
+    ot = "DRMConnector"
+  end
+
   -- Override for codec/format listings which are of type String, not
   -- object
   if oneOf(o, "ad", "vd", "oac", "ovc") then
@@ -318,6 +323,7 @@ local function parseOpt(t, lu, group, o, tail)
   elseif ot == "Time"       then clist = { "00:00:00" }
   elseif ot == "Window"     then ot = "Dimen"
   elseif ot == "Profile"    then clist = {}
+  elseif ot == "DRMConnector" then clist = {}
   else
     ot = "Single"
   end
@@ -460,6 +466,12 @@ _mpv_profiles(){
   type mpv &>/dev/null || return 0;
   local p=$(mpv --profile help)
   echo "${p##*:}"
+}
+_mpv_drm_connectors(){
+  type mpv &>/dev/null || return 0;
+  local conn=$(mpv --no-config --drm-connector help \
+                | awk '/\<connected\>/{ print $1 ; }')
+  echo "${conn}"
 }
 _mpv_xrandr(){
   if [[ -z "$_mpv_xrandr_cache" && -n "$DISPLAY" ]] && type xrandr &>/dev/null; then
@@ -613,6 +625,14 @@ _mpv(){
         table.insert(all, o)
         return o
       end)))
+  end
+  if olist.DRMConnector then
+    i(string.format([[%s)_mpv_s "$(_mpv_drm_connectors)" "$cur";return;;]],
+      mapcator(keys(olist.DRMConnector), function (e)
+            local o = string.format("--%s", e)
+            table.insert(all, o)
+            return o
+    end)))
   end
   if olist.Directory then
     i(string.format("%s)_filedir -d;return;;",
