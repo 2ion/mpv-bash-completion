@@ -182,6 +182,31 @@ local function expandObject(o)
   return clist
 end
 
+local function split(s, delim)
+  assert(s)
+  local delim = delim or ","
+  local parts = {}
+  for p in s:gmatch(string.format("[^%s]+", delim)) do
+    table.insert(parts, p)
+  end
+  return parts
+end
+
+local function expandChoice(o)
+  local h = mpv(string.format("--%s help", o))
+  local clist = {}
+  for l in h:lines() do
+    local m = l:match("^Choices: ([%S,.-]+)")
+    if m then
+      local choices = split(m, ",")
+      for _,v in ipairs(choices) do
+        table.insert(clist, v)
+      end
+    end
+  end
+  return clist
+end
+
 local function getRawVideoMpFormats()
   local h = mpv("--demuxer-rawvideo-mp-format=help")
   local line = assert_read(h)
@@ -231,8 +256,21 @@ local function parseOpt(t, lu, group, o, tail)
   local clist = nil
 
   -- Overrides for wrongly option type labels
-  if oneOf(o, "opengl-backend") then
+  -- Usually String: where it should have been Object
+  if oneOf(o, "opengl-backend",
+              "opengl-hwdec-interop",
+              "audio-demuxer",
+              "cscale-window",
+              "demuxer",
+              "dscale",
+              "dscale-window",
+              "scale-window",
+              "sub-demuxer") then
     ot = "Object"
+  end
+
+  if oneOf(o, "audio-spdif") then
+    ot = "ExpandableChoice"
   end
 
   -- Override for dynamic profile list expansion
@@ -256,6 +294,8 @@ local function parseOpt(t, lu, group, o, tail)
   elseif ot == "Audio"      then clist = { extractDefault(tail), extractRange(tail) }
   elseif ot == "Choices:"   then clist = { extractRange(tail), extractDefault(tail), table.unpack(extractChoices(tail)) }
                                  ot = "Choice"
+  elseif ot == "ExpandableChoice" then clist = expandChoice(o)
+                                       ot = "Choice"
   elseif ot == "Color"      then clist = { "#ffffff", "1.0/1.0/1.0/1.0" }
   elseif ot == "FourCC"     then clist = { "YV12", "UYVY", "YUY2", "I420", "other" }
   elseif ot == "Image"      then clist = lu.videoFormats
