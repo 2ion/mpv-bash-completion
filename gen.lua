@@ -30,7 +30,6 @@ end
 -- Reporting on optionList() result
 local function debug_categories(ot)
   if not VERBOSE then return end
-  log("Counting top-level options...")
   local lines = {}
   local function count(t)
     local n = 0
@@ -42,11 +41,11 @@ local function debug_categories(ot)
   local sum = 0
   for cat,t in pairs(ot) do
     local c = count(t)
-    table.insert(lines, string.format("%s -> %d", cat, count(t)))
+    table.insert(lines, string.format(" %s: %d", cat, count(t)))
     sum = sum + c
   end
   table.sort(lines)
-  table.insert(lines, string.format("total %d", sum))
+  table.insert(lines, 1, string.format("Found %d options:", sum))
   log(table.concat(lines, "\n"))
 end
 
