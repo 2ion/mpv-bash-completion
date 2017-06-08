@@ -86,6 +86,16 @@ local function oneOf(n, ...)
   return false
 end
 
+local function filter(t, f)
+  local u = {}
+  for _, v in ipairs(t) do
+    if f(v) then
+      table.insert(u, v)
+    end
+  end
+  return u
+end
+
 local function map(t, f)
   local u = {}
   for _,v in ipairs(t) do
