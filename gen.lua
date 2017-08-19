@@ -165,9 +165,20 @@ end
 local function expandObject(o)
   local h = mpv(string.format("--%s help", o))
   local clist = {}
+
+  local function lineFilter(line)
+    if line:match("^Available")
+    or line:match("^%s+%(other")
+    or line:match("^%s+demuxer:")
+    then
+      return false
+    end
+    return true
+  end
+
   for l in h:lines() do
     local m = l:match("^%s+([%S.]+)")
-    if m then
+    if lineFilter(l) and m then
       -- oac, ovc special case: filter out --foo=needle
       local tail = m:match("^--[^=]+=(.*)$")
       if tail then
