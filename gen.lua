@@ -273,7 +273,7 @@ local function parseOpt(t, lu, group, o, tail)
   end
 
   -- Override for dynamic profile list expansion
-  if oneOf(o, "profile") then
+  if o:match("^profile") then
     ot = "Profile"
   end
 
