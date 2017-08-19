@@ -351,11 +351,22 @@ end
 
 local function optionList()
   local t = {}
+  local prev_s = nil
   local h = mpv("--list-options")
 
   for s in h:lines() do
-    local o, s= s:match("^ %-%-(%S+)%s+(%S.*)")
-    if o then parseOpt(t, LOOKUP, true, o, s) end
+    -- Regular, top-level options
+    local o, ss = s:match("^%s+%-%-(%S+)%s+(%S.*)")
+    if o then
+      prev_s = ss
+      parseOpt(t, LOOKUP, true, o, ss)
+    else
+      -- Second-level options (--vf-add, --vf-del etc)
+      local o = s:match("^%s+%-%-(%S+)")
+      if o then
+        parseOpt(t, LOOKUP, true, o, prev_s)
+      end
+    end
   end
 
   h:close()
