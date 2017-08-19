@@ -474,8 +474,8 @@ _mpv_uniq(){
 }
 _mpv_profiles(){
   type mpv &>/dev/null || return 0;
-  local p=$(mpv --profile help)
-  echo "${p##*:}"
+  mpv --profile help  \
+  | awk '{if(NR>2 && $1 != ""){ print $1; }}'
 }
 _mpv_drm_connectors(){
   type mpv &>/dev/null || return 0;
