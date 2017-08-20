@@ -412,12 +412,6 @@ local function optionList()
       else
         no[o] = p
       end
-      if o:match("^[av]o") and p.clist then
-        for _,e in ipairs(p.clist) do
-          if not fargs[o]    then fargs[o] = {} end
-          if not fargs[o][e] then fargs[o][e] = getAVFilterArgs2(o, e) end
-        end
-      end
     end
     t.Object = no
   end
