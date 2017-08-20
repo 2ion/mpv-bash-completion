@@ -385,17 +385,23 @@ local function optionList()
 
   -- Expand filter arguments
 
+  local function stem(name)
+    local bound = name:find("-", 1, true)
+    if bound then
+      return name:sub(1, bound-1)
+    end
+    return name
+  end
+
   local fargs = {}
   if t.Object then
     for name, value in pairs(t.Object) do
       if name:match("^vf") or name:match("^af") then
+        local stem = stem(name)
         for _, filter in ipairs(value.clist or {}) do
-          if not fargs[name] then
-            fargs[name] = {}
-          end
-          if not fargs[name][filter] then
-            fargs[name][filter] = getAVFilterArgs2(name, filter)
-          end
+          fargs[stem]         = fargs[stem] or {}
+          fargs[stem][filter] = fargs[stem][filter] or getAVFilterArgs2(stem, filter)
+          fargs[name]         = fargs[stem]
         end -- for
       end -- if
     end -- for
