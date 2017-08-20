@@ -210,6 +210,7 @@ local function expandChoice(o)
     if m then
       local choices = split(m, ",")
       for _,v in ipairs(choices) do
+        log(" + %s += [%s]", o, v)
         table.insert(clist, v)
       end
     end
