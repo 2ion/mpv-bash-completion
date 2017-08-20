@@ -383,39 +383,23 @@ local function optionList()
 
   h:close()
 
-  local fargs = {}
+  -- Expand filter arguments
 
-  -- Not fully present anymore in very recent git HEADs. Let's keep this
-  -- around for a while.
-  -- Still important is the expansion of --af*/--vf* to --af-add etc
+  local fargs = {}
   if t.Object then
-    local no = {}
-    for o,p in pairs(t.Object) do
-      if o:sub(-1) == "*" then
-        local stem = o:sub(1, -2)
-        local alter = t.Object[stem.."-defaults"]
-        -- filter argument detection
-        for _,e in ipairs(alter.clist) do
-          if not fargs[stem] then fargs[stem] = {} end
-          if not fargs[stem][e] then fargs[stem][e] = getAVFilterArgs2(stem, e) end
-        end
-        -- af/vf aliases
-        for _,variant in pairs(p.clist) do
-          -- Drop stray matches from expandObject(), option description
-          -- text formatting is inconsistent, so this is hard to prevent
-          -- without breaking stuff elsewhere.
-          if variant:match("^[a-z0-9]") then
-            log("alias %s -> %s", variant, stem)
-            no[variant] = alter
+    for name, value in pairs(t.Object) do
+      if name:match("^vf") or name:match("^af") then
+        for _, filter in ipairs(value.clist or {}) do
+          if not fargs[name] then
+            fargs[name] = {}
           end
-        end
-        no[stem] = alter
-      else
-        no[o] = p
-      end
-    end
-    t.Object = no
-  end
+          if not fargs[name][filter] then
+            fargs[name][filter] = getAVFilterArgs2(name, filter)
+          end
+        end -- for
+      end -- if
+    end -- for
+  end -- if
   setmetatable(t, { fargs = fargs })
 
   return t
