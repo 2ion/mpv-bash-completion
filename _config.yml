@@ -1,0 +1,8 @@
+title: mpv-bash-completion
+description: Featureful Bash completion for the mpv video player · Linux/BSD/OSX
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-minimal
+
+gems:
+  - jekyll-mentions
