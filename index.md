@@ -1,3 +1,7 @@
+# mpv-bash-completion
+
+Latest release: **[3.3.15](https://github.com/2ion/mpv-bash-completion/releases/tag/3.3.15)**
+
 A script for generating a Bash completion script for the popular [mpv
 video player](https://github.com/mpv-player/mpv).
 It features...
@@ -18,8 +22,8 @@ It features...
 * [Arch Linux](#arch-linux)
 * [Debian Jessie/Testing/Unstable + Ubuntu 16.04 Xenial](#debian)
 * Gentoo Linux, Funtoo Linux: [app-shells/mpv-bash-completion](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion)
-* [OS X Homebrew](#osx-homebrew)
 * [Generic Linux/OSX/Unix systems](#platform-agnostic-method)
+* [OS X Homebrew](#osx-homebrew) (unmaintained)
 
 ## Source code
 
@@ -33,9 +37,16 @@ Tarballs of tagged releases can be downloaded [here](https://github.com/2ion/mpv
 
 ## Dependencies
 
+* Awk (any awk: gawk, nawk, mawk, etc -- should do)
 * Bash 4
 * Lua 5.1 or 5.2 or 5.3 or LuaJIT
-* mpv >= 0.14
+* mpv >= 0.25
+
+**Note on older mpv versions**: The mpv command line has changed
+considerably since version 0.25, making it impossible to support older
+versions due to the huge number of special cases that would need to be
+covered.  For compatbility with older mpv releases, please use a
+historic version of mpv-bash-completion.
 
 ### Optional dependencies
 
@@ -114,6 +125,10 @@ dpkg-buildpackage -us -uc -b # Install the resulting package: dpkg -i $package
 ```
 
 ### OSX Homebrew
+
+*Note: Since I do not have access to a Mac computer anymore, I cannot
+maintain this formula any longer. I am leaving it here for the time
+being hoping it is still working.*
 
 You can simply install using the provided formula. You need to reinstall
 every time you upgrade mpv in order to update the completion function to
