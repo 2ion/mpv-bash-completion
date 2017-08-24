@@ -55,10 +55,14 @@ historic version of mpv-bash-completion.
 
 ### Supporting inputrc configuration
 
-We recommend the following setting for a snappier completion experience:
-To the file `~/.inputrc`, add the line
+We recommend the following setting for snappier and more luxurious
+completion experience: To the file `~/.inputrc`, add the lines
 ```
-set show-all-if-ambiguous on
+set blink-matching-paren On
+set colored-stats On
+set completion-ignore-case On
+set show-all-if-ambiguous On
+set visible-stats On
 ```
 Launch a new shell to use the setting.
 
