@@ -17,13 +17,24 @@ It features...
 * Similarly, parameter completion for video and audio outputs (--vo, --ao),
 * Regular file name completion.
 
-## Supported OSs
+## Supported distributions / operating systems
 
-* [Arch Linux](#arch-linux)
-* [Debian Jessie/Testing/Unstable + Ubuntu 16.04 Xenial](#debian)
-* Gentoo Linux, Funtoo Linux: [app-shells/mpv-bash-completion](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion)
-* [Generic Linux/OSX/Unix systems](#platform-agnostic-method)
-* [OS X Homebrew](#osx-homebrew) (unmaintained)
+For the distributions listed here, packages have been created and are being
+actively maintained.  For other platforms and distributions, you can build the
+completion by yourself, see [below](#platform-agnostic-method), as long as the
+platform can run mpv and the [dependencies](#dependencies).
+
+| Distribution               | Repository           | Package/Port                                                                                          | Maintainer | Comment                                      |
+| -------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------- | ---------- | -------                                      |
+| Arch Linux                 | AUR                  | [mpv-bash-completion-git](https://aur.archlinux.org/packages/mpv-bash-completion-git/)                | @2ion      | Automatic completion updates via pacman hook |
+| Gentoo Linux, Funtoo Linux | Mainline             | [app-shells/mpv-bash-completion](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion) | @coacher   |                                              |
+| macOS                      | Custom homebrew tap  | @2ion/mpv-bash-completion                                                                             | @2ion      | See instructions [here](#homebrew)           |
+
+### Retired packages
+
+There used to be Debian and Ubuntu packages for mpv-bash-completion, but
+I cannot maintain them any longer. If you're interested, you can get the
+package source from the [debian branch](https://github.com/2ion/mpv-bash-completion/tree/debian).
 
 ## Source code
 
@@ -82,53 +93,7 @@ of the supported platforms.
 source ./mpv.sh
 ```
 
-### Arch Linux
-
-Install [mpv-bash-completion-git](https://aur.archlinux.org/packages/mpv-bash-completion-git/)
-from the AUR. It will install all necessary dependencies and also ships
-a pacman hook which automatically rebuilds the completion file whenever
-you update mpv so it's **not** necessary to install the package every time.
-
-### Debian
-
-.deb packages can be downloaded directly [here](https://pkg.bunsenlabs.org/debian/pool/main/m/mpv-bash-completion/).
-
-#### Stable (Jessie)
-
-Install via BunsenLabs. Set up the `bunsenlabs-hydrogen` repository as
-described [here](https://pkg.bunsenlabs.org/index.html#bunsen-hydrogen),
-then execute:
-
-```sh
-sudo apt-get update && sudo apt-get install mpv-bash-completion
-```
-
-#### Testing & Sid; Ubuntu Xenial
-
-These currently contain mpv 0.14 for which the below package is built.
-
-Install via the BunsenLabs unstable repository. Set up the `unstable`
-repository as explained [here](https://pkg.bunsenlabs.org/#unstable),
-then execute:
-
-```sh
-sudo apt-get update && sudo apt-get install mpv-bash-completion
-```
-
-#### mpv git builds / custom package build
-
-You can build a package on Debian testing or unstable, or if your mpv's
-version is greater than approximately 0.14. Jessie's version of mpv is
-too old.
-
-```sh
-sudo apt-get install debhelper mpv lua5.3 dpkg-dev git
-git clone https://github.com/2ion/mpv-bash-completion.git
-cd mpv-bash-completion && git checkout debian
-dpkg-buildpackage -us -uc -b # Install the resulting package: dpkg -i $package
-```
-
-### OSX Homebrew
+### Homebrew
 
 *Note: Since I do not have access to a Mac computer anymore, I cannot
 maintain this formula any longer. I am leaving it here for the time
