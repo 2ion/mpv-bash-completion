@@ -426,16 +426,16 @@ local function createScript(olist)
     return pairs(t)
   end
 
-  local function i(...)
+  local function emit(...)
     for _,e in ipairs{...} do
       table.insert(lines, e)
     end
   end
 
-  i([[#!/bin/bash
+  emit([[#!/bin/bash
 # mpv ]]..MPV_VERSION)
 
-  i([[### LOOKUP TABLES AND CACHES ###
+  emit([[### LOOKUP TABLES AND CACHES ###
 declare _mpv_xrandr_cache
 declare -A _mpv_fargs
 declare -A _mpv_pargs]])
@@ -445,18 +445,18 @@ declare -A _mpv_pargs]])
       local plist = table.concat(keys(pv), "= ")
       if #plist > 0 then
         plist = plist.."="
-        i(string.format([[_mpv_fargs[%s@%s]="%s"]], o, f, plist))
+        emit(string.format([[_mpv_fargs[%s@%s]="%s"]], o, f, plist))
       end
       for p,pa in pairs(pv) do
         plist = pa.clist and table.concat(pa.clist, " ") or ""
         if #plist > 0 then
-          i(string.format([[_mpv_pargs[%s@%s@%s]="%s"]], o, f, p, plist ))
+          emit(string.format([[_mpv_pargs[%s@%s@%s]="%s"]], o, f, p, plist ))
         end
       end
     end
   end
 
-  i([=[### HELPER FUNCTIONS ###
+  emit([=[### HELPER FUNCTIONS ###
 _mpv_uniq(){
   local -A w
   local o=""
@@ -582,7 +582,7 @@ _mpv_objarg(){
   printf "${r% }"
 }]=])
 
-  i([=[### COMPLETION ###
+  emit([=[### COMPLETION ###
 _mpv(){
   local cur=${COMP_WORDS[COMP_CWORD]}
   local prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -598,26 +598,26 @@ _mpv(){
     end
   })
 
-  i([=[if [[ -n $cur ]]; then case "$cur" in]=])
+  emit([=[if [[ -n $cur ]]; then case "$cur" in]=])
   for o,p in ofType("Choice", "Flag") do
-    i(string.format([[--%s=*)_mpv_s '%s' "$cur"; return;;]],
+    emit(string.format([[--%s=*)_mpv_s '%s' "$cur"; return;;]],
         o, mapcats(p.clist, function (e) return string.format("--%s=%s", o, e) end)))
     table.insert(all, string.format("--%s=", o))
   end
-  i("esac; fi")
+  emit("esac; fi")
 
-  i([=[if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case "$prev" in]=])
+  emit([=[if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case "$prev" in]=])
   for o,p in ofType("Object") do
     if o:match("^[av][fo]") then
-      i(string.format([[--%s)_mpv_s "$(_mpv_objarg "$prev" "$cur" %s)" "$cur";return;;]],
+      emit(string.format([[--%s)_mpv_s "$(_mpv_objarg "$prev" "$cur" %s)" "$cur";return;;]],
         o, p.clist and table.concat(p.clist, " ") or ""))
     end
   end
-  i("esac; fi")
+  emit("esac; fi")
 
-  i([=[if [[ -n $prev ]]; then case "$prev" in]=])
+  emit([=[if [[ -n $prev ]]; then case "$prev" in]=])
   if olist.File then
-    i(string.format("%s)_filedir;return;;",
+    emit(string.format("%s)_filedir;return;;",
       mapcator(keys(olist.File), function (e)
         local o = string.format("--%s", e)
         table.insert(all, o)
@@ -625,7 +625,7 @@ _mpv(){
       end)))
   end
   if olist.Profile then
-    i(string.format([[%s)_mpv_s "$(_mpv_profiles)" "$cur";return;;]],
+    emit(string.format([[%s)_mpv_s "$(_mpv_profiles)" "$cur";return;;]],
       mapcator(keys(olist.Profile), function (e)
         local o = string.format("--%s", e)
         table.insert(all, o)
@@ -633,7 +633,7 @@ _mpv(){
       end)))
   end
   if olist.DRMConnector then
-    i(string.format([[%s)_mpv_s "$(_mpv_drm_connectors)" "$cur";return;;]],
+    emit(string.format([[%s)_mpv_s "$(_mpv_drm_connectors)" "$cur";return;;]],
       mapcator(keys(olist.DRMConnector), function (e)
             local o = string.format("--%s", e)
             table.insert(all, o)
@@ -641,7 +641,7 @@ _mpv(){
     end)))
   end
   if olist.Directory then
-    i(string.format("%s)_filedir -d;return;;",
+    emit(string.format("%s)_filedir -d;return;;",
       mapcator(keys(olist.Directory), function (e)
         local o = string.format("--%s", e)
         table.insert(all, o)
@@ -651,25 +651,25 @@ _mpv(){
   for o, p in ofType("Object", "Numeric", "Audio", "Color", "FourCC", "Image",
     "String", "Position", "Time") do
     if p.clist then table.sort(p.clist) end
-    i(string.format([[--%s)_mpv_s '%s' "$cur"; return;;]],
+    emit(string.format([[--%s)_mpv_s '%s' "$cur"; return;;]],
       o, p.clist and table.concat(p.clist, " ") or ""))
     all(o)
   end
   for o,p in ofType("Dimen") do
-    i(string.format([[--%s)_mpv_s "$(_mpv_xrandr)" "$cur";return;;]], o))
+    emit(string.format([[--%s)_mpv_s "$(_mpv_xrandr)" "$cur";return;;]], o))
     all(o)
   end
-  i("esac; fi")
+  emit("esac; fi")
 
-  i("if [[ $cur =~ ^- ]]; then")
+  emit("if [[ $cur =~ ^- ]]; then")
   for o,_ in ofType("Single") do all(o) end
-  i(string.format([[_mpv_s '%s' "$cur"; return;]],
+  emit(string.format([[_mpv_s '%s' "$cur"; return;]],
     table.concat(all, " ")))
-  i("fi")
+  emit("fi")
 
-  i("_filedir")
+  emit("_filedir")
 
-  i("}", "complete -o nospace -F _mpv "..basename(MPV_CMD))
+  emit("}", "complete -o nospace -F _mpv "..basename(MPV_CMD))
   return table.concat(lines, "\n")
 end
 
