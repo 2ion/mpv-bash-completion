@@ -468,9 +468,8 @@ _mpv_profiles(){
 }
 _mpv_drm_connectors(){
   type mpv &>/dev/null || return 0;
-  local conn=$(mpv --no-config --drm-connector help \
-                | awk '/\<connected\>/{ print $1 ; }')
-  echo "${conn}"
+  mpv --no-config --drm-connector help \
+  | awk '/\<connected\>/{ print $1 ; }'
 }
 _mpv_xrandr(){
   if [[ -z "$_mpv_xrandr_cache" && -n "$DISPLAY" ]] && type xrandr &>/dev/null; then
