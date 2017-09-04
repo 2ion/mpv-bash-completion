@@ -67,13 +67,6 @@ local function assert_read(h, w)
   return assert(h:read(w or "*all"), "can't read from file handle: no data")
 end
 
-local function bash_escape(s)
-  local h = io.popen(string.format([[bash -c "printf '%%q' '%s'"]], s))
-  local ret = h:read("*all")
-  h:close()
-  return ret
-end
-
 -----------------------------------------------------------------------
 -- Table ops
 -----------------------------------------------------------------------
