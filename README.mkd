@@ -1,6 +1,11 @@
+
+
 # mpv-bash-completion
 
 Latest release: **[3.3.15](https://github.com/2ion/mpv-bash-completion/releases/tag/3.3.15)**
+
+[![AUR package](https://repology.org/badge/version-for-repo/aur/mpv-bash-completion.svg)](https://repology.org/metapackage/mpv-bash-completion)
+[![Gentoo package](https://repology.org/badge/version-for-repo/gentoo/mpv-bash-completion.svg)](https://repology.org/metapackage/mpv-bash-completion)
 
 A script for generating a Bash completion script for the popular [mpv
 video player](https://github.com/mpv-player/mpv).
