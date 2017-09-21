@@ -1,5 +1,3 @@
-
-
 # mpv-bash-completion
 
 Latest release: **[3.3.15](https://github.com/2ion/mpv-bash-completion/releases/tag/3.3.15)**
@@ -33,6 +31,7 @@ platform can run mpv and the [dependencies](#dependencies).
 | -------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------- | ---------- | -------                                      |
 | Arch Linux                 | AUR                  | [mpv-bash-completion-git](https://aur.archlinux.org/packages/mpv-bash-completion-git/)                | @2ion      | Automatic completion updates via pacman hook |
 | Gentoo Linux, Funtoo Linux | Mainline             | [app-shells/mpv-bash-completion](https://packages.gentoo.org/packages/app-shells/mpv-bash-completion) | @coacher   |                                              |
+| OpenSuSE                   | Leap, Tumbleweed     | [mpv-bash-completion](https://software.opensuse.org/package/mpv-bash-completion)											| 					 | 																							|
 | macOS                      | Custom homebrew tap  | @2ion/mpv-bash-completion                                                                             | @2ion      | See instructions [here](#homebrew)           |
 
 ### Retired packages
