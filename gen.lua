@@ -328,6 +328,8 @@ local function parseOpt(t, lu, group, o, tail)
   elseif ot == "Window"     then ot = "Dimen"
   elseif ot == "Profile"    then clist = {}
   elseif ot == "DRMConnector" then clist = {}
+  elseif ot == "alias"      then clist = { tail:match("^alias for (%S+)") or "" }
+                                 ot = "Alias"
   else
     ot = "Single"
   end
@@ -400,6 +402,31 @@ local function optionList()
     end -- for
   end -- if
   setmetatable(t, { fargs = fargs })
+
+  -- Resolve new-style aliases
+
+  local function find_option(name)
+    for group, members in pairs(t) do
+      for o, oo in pairs(members) do
+        if o == name then
+          return group, oo
+        end
+      end
+    end
+    return nil
+  end
+
+  if t.Alias then
+    for name, val in pairs(t.Alias) do
+      local alias = table.remove(val.clist)
+      local group, oo = find_option(alias)
+      if group then
+        log(" * %s is an alias of %s[%s]", name, group, alias)
+        t[group][name] = oo
+      end
+    end
+    t.Alias = nil
+  end
 
   return t
 end
