@@ -245,9 +245,15 @@ local function extractRange(tail)
   end
 end
 
-local function wantsFile(tail)
+local function wantsFile(op, tail)
   local m = tail:match("%[file%]")
-  return m and true or false
+  if m then return true end
+
+  for _,re in ipairs{ "%-file[s]?%-", "^script[s]?", "^scripts%-.*" } do
+    if op:match(re) then return true end
+  end
+
+  return false
 end
 
 local function hasNoCfg(tail)
@@ -316,7 +322,7 @@ local function parseOpt(t, lu, group, o, tail)
                                  ot = "String"
   elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
                                  ot = "Position"
-  elseif ot == "String"     then if wantsFile(tail) then
+  elseif ot == "String"     then if wantsFile(o, tail) then
                                    ot = "File"
                                    if o:match('directory') or o:match('dir') then
                                      ot = "Directory"
