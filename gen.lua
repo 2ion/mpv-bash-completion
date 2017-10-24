@@ -101,10 +101,41 @@ local function unique(t)
   return u
 end
 
+-- pairs() replacement with iterating using sorted keys
+local function spairs(t)
+  assert(t)
+
+  local keys = {}
+  for kk,_ in pairs(t) do
+    table.insert(keys, kk)
+  end
+
+  local len = #keys
+  local xi = 1
+
+  local function snext(t, index)
+    if not t
+      or (index and index == len)
+      or len == 0 then
+      return nil
+    elseif index == nil then
+      local k = keys[xi]
+      return k, t[k]
+    else
+      xi = xi + 1
+      local k = keys[xi]
+      return k, t[k]
+    end
+  end
+
+  table.sort(keys)
+  return snext, t, nil
+end
+
 local function keys(t)
   local u = {}
   if t then
-    for k,_ in pairs(t) do
+    for k,_ in spairs(t) do
       table.insert(u, k)
     end
   end
@@ -444,12 +475,12 @@ local function createScript(olist)
     local t = {}
     for _,k in ipairs{...} do
       if olist[k] then
-        for u,v in pairs(olist[k]) do
+        for u,v in spairs(olist[k]) do
           t[u] = v
         end
       end
     end
-    return pairs(t)
+    return spairs(t)
   end
 
   local function emit(...)
@@ -466,14 +497,14 @@ declare _mpv_xrandr_cache
 declare -A _mpv_fargs
 declare -A _mpv_pargs]])
   local fargs = getmetatable(olist).fargs
-  for o,fv in pairs(fargs) do
-    for f,pv in pairs(fv) do
+  for o,fv in spairs(fargs) do
+    for f,pv in spairs(fv) do
       local plist = table.concat(keys(pv), "= ")
       if #plist > 0 then
         plist = plist.."="
         emit(string.format([[_mpv_fargs[%s@%s]="%s"]], o, f, plist))
       end
-      for p,pa in pairs(pv) do
+      for p,pa in spairs(pv) do
         plist = pa.clist and table.concat(pa.clist, " ") or ""
         if #plist > 0 then
           emit(string.format([[_mpv_pargs[%s@%s@%s]="%s"]], o, f, p, plist ))
