@@ -315,7 +315,7 @@ local function parseOpt(t, lu, group, o, tail)
   end
 
   -- Override for dynamic profile list expansion
-  if o:match("^profile") then
+  if o:match("^profile") or o == "show-profile" then
     ot = "Profile"
   end
 
