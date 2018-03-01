@@ -11,21 +11,12 @@
 --                                using the shell's $PATH.
 
 
-local VERBOSE     = not not os.getenv("MPV_BASHCOMPGEN_VERBOSE") or false
-local MPV_CMD     = os.getenv("MPV_BASHCOMPGEN_MPV_CMD") or "mpv"
-local MPV_VERSION = "unknown"
-local LOOKUP      = nil
 
 local Option_Transformations = require 'mpv_bash_completion.option_transformations'
+local Util = require 'mpv_bash_completion.util'
 -----------------------------------------------------------------------
 -- Shell and stdio ops
 -----------------------------------------------------------------------
-
-local function log(s, ...)
-  if VERBOSE then
-    io.stderr:write(string.format(s.."\n", ...))
-  end
-end
 
 -- Reporting on optionList() result
 local function debug_categories(ot)
@@ -46,25 +37,7 @@ local function debug_categories(ot)
   end
   table.sort(lines)
   table.insert(lines, 1, string.format("Found %d options:", sum))
-  log(table.concat(lines, "\n"))
-end
-
-local function basename(s)
-  return s:match("^.-([^/]+)$")
-end
-
-local function run(cmd, ...)
-  local argv = table.concat({...}, " ")
-  log("%s %s", cmd, argv)
-  return assert(io.popen(string.format("%s " .. argv, cmd), "r"))
-end
-
-local function mpv(...)
-  return run(MPV_CMD, "--no-config", ...)
-end
-
-local function assert_read(h, w)
-  return assert(h:read(w or "*all"), "can't read from file handle: no data")
+  Util.log(table.concat(lines, "\n"))
 end
 
 -----------------------------------------------------------------------
@@ -179,86 +152,11 @@ local Option = setmetatable({}, {
   end
 })
 
-local function getMpvVersion()
-  local h = mpv("--version")
-  local s = assert_read(h, "*line")
-  h:close()
-  return s:match("^%S+ (%S+)")
-end
-
-local function expandObject(o)
-  local h = mpv(string.format("--%s help", o))
-  local clist = {}
-
-  local function lineFilter(line)
-    if line:match("^Available")
-    or line:match("^%s+%(other")
-    or line:match("^%s+demuxer:")
-    then
-      return false
-    end
-    return true
-  end
-
-  for l in h:lines() do
-    local m = l:match("^%s+([%S.]+)")
-    if lineFilter(l) and m then
-      -- oac, ovc special case: filter out --foo=needle
-      local tail = m:match("^--[^=]+=(.*)$")
-      if tail then
-        log(" ! %s :: %s -> %s", o, m, tail)
-        m = tail
-      end
-      table.insert(clist, m)
-    end
-  end
-  h:close()
-  return clist
-end
-
-local function split(s, delim)
-  assert(s)
-  local delim = delim or ","
-  local parts = {}
-  for p in s:gmatch(string.format("[^%s]+", delim)) do
-    table.insert(parts, p)
-  end
-  return parts
-end
-
-local function expandChoice(o)
-  local h = mpv(string.format("--%s help", o))
-  local clist = {}
-  for l in h:lines() do
-    local m = l:match("^Choices: ([%S,.-]+)")
-    if m then
-      local choices = split(m, ",")
-      for _,v in ipairs(choices) do
-        log(" + %s += [%s]", o, v)
-        table.insert(clist, v)
-      end
-    end
-  end
-  return clist
-end
-
-local function getRawVideoMpFormats()
-  local h = mpv("--demuxer-rawvideo-mp-format=help")
-  local line = assert_read(h)
-  local clist = {}
-  line = line:match(": (.*)")
-  for f in line:gmatch("%w+") do
-    table.insert(clist, f)
-  end
-  h:close()
-  return clist
-end
-
-local function parseOpt(t, lu, group, o, tail)
+local function parseOpt(t, group, o, tail)
   local ot = tail:match("(%S+)")
   local clist = nil
 
-  ot, clist = Option_Transformations.transform(o, ot, tail, LOOKUP)
+  ot, clist = Option_Transformations.transform(o, ot, tail)
 
   local oo = Option(clist)
   log(" + %s :: %s -> [%s]", o, ot, oo.clist and table.concat(oo.clist, " ") or "")
@@ -271,33 +169,34 @@ local function parseOpt(t, lu, group, o, tail)
   end
 end
 
-local function getAVFilterArgs2(o, f)
-  local h = mpv(string.format("--%s %s=help", o, f))
-  local t = {}
-  for l in h:lines() do
-    local o, tail = l:match("^%s([%w%-]+)%s+(%S.*)")
-    if o then parseOpt(t, LOOKUP, false, o, tail) end
-  end
-  h:close()
-  return t
-end
 
 local function optionList()
   local t = {}
   local prev_s = nil
   local h = mpv("--list-options")
 
+  local function getAVFilterArgs2(o, f)
+    local h = Util.mpv(string.format("--%s %s=help", o, f))
+    local t = {}
+    for l in h:lines() do
+      local o, tail = l:match("^%s([%w%-]+)%s+(%S.*)")
+      if o then parseOpt(t, false, o, tail) end
+    end
+    h:close()
+    return t
+  end
+
   for s in h:lines() do
     -- Regular, top-level options
     local o, ss = s:match("^%s+%-%-(%S+)%s+(%S.*)")
     if o then
       prev_s = ss
-      parseOpt(t, LOOKUP, true, o, ss)
+      parseOpt(t, true, o, ss)
     else
       -- Second-level options (--vf-add, --vf-del etc)
       local o = s:match("^%s+%-%-(%S+)")
       if o then
-        parseOpt(t, LOOKUP, true, o, prev_s)
+        parseOpt(t, true, o, prev_s)
       end
     end
   end
@@ -379,7 +278,7 @@ local function createScript(olist)
   end
 
   emit([[#!/bin/bash
-# mpv ]]..MPV_VERSION)
+# mpv ]] .. Util.MPV_VERSION)
 
   emit([[### LOOKUP TABLES AND CACHES ###
 declare _mpv_xrandr_cache
@@ -614,7 +513,7 @@ _mpv(){
 
   emit("_filedir")
 
-  emit("}", "complete -o nospace -F _mpv "..basename(MPV_CMD))
+  emit("}", "complete -o nospace -F _mpv " .. Util.basename(Util.MPV_CMD))
   return table.concat(lines, "\n")
 end
 
@@ -623,8 +522,6 @@ end
 -----------------------------------------------------------------------
 
 local function main()
-  MPV_VERSION = getMpvVersion()
-  LOOKUP = { videoFormats = getRawVideoMpFormats() }
 
   local l = optionList()
   debug_categories(l)

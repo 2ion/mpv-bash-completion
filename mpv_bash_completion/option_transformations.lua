@@ -1,8 +1,66 @@
 if _VERSION == "Lua 5.1" then table.unpack = unpack end
 
+local Util = require 'mpv_bash_completion.util'
+
 -----------------------------------------------------------------------
 -- PRIVATE FUNCTIONS
 -----------------------------------------------------------------------
+
+local function split(s, delim)
+  assert(s)
+  local delim = delim or ","
+  local parts = {}
+  for p in s:gmatch(string.format("[^%s]+", delim)) do
+    table.insert(parts, p)
+  end
+  return parts
+end
+
+local function expandChoice(o)
+  local h = Util.mpv(string.format("--%s help", o))
+  local clist = {}
+  for l in h:lines() do
+    local m = l:match("^Choices: ([%S,.-]+)")
+    if m then
+      local choices = split(m, ",")
+      for _,v in ipairs(choices) do
+        Util.log(" + %s += [%s]", o, v)
+        table.insert(clist, v)
+      end
+    end
+  end
+  return clist
+end
+
+local function expandObject(o)
+  local h = Util.mpv(string.format("--%s help", o))
+  local clist = {}
+
+  local function lineFilter(line)
+    if line:match("^Available")
+    or line:match("^%s+%(other")
+    or line:match("^%s+demuxer:")
+    then
+      return false
+    end
+    return true
+  end
+
+  for l in h:lines() do
+    local m = l:match("^%s+([%S.]+)")
+    if lineFilter(l) and m then
+      -- oac, ovc special case: filter out --foo=needle
+      local tail = m:match("^--[^=]+=(.*)$")
+      if tail then
+        Util.log(" ! %s :: %s -> %s", o, m, tail)
+        m = tail
+      end
+      table.insert(clist, m)
+    end
+  end
+  h:close()
+  return clist
+end
 
 local function hasNoCfg(tail)
   local m = tail:match("%[nocfg%]") -- or tail:match("%[global%]") -- Fuck.
@@ -131,6 +189,18 @@ local function ot_alias(o, ot, tail, lookup_table)
   return "Alias", { tail:match("^alias for (%S+)") or "" }
 end
 
+local function getRawVideoMpFormats()
+  local h = Util.mpv("--demuxer-rawvideo-mp-format=help")
+  local line = Util.assert_read(h)
+  local clist = {}
+  line = line:match(": (.*)")
+  for f in line:gmatch("%w+") do
+    table.insert(clist, f)
+  end
+  h:close()
+  return clist
+end
+
 -----------------------------------------------------------------------
 -- PRIVATE VARIABLES
 -----------------------------------------------------------------------
@@ -183,12 +253,16 @@ local O_OT_MATCHES = {
    ["^profile"] = "Profile",
 }
 
+local LOOKUP = {
+  videoFormats = getRawVideoMpFormats()
+}
+
 -----------------------------------------------------------------------
 -- PUBLIC API
 -----------------------------------------------------------------------
 
 return {
-  transform = function (o, ot, tail, lookup_table)
+  transform = function (o, ot, tail)
     local o = o
     local ot = ot
     local clist = nil
@@ -204,7 +278,7 @@ return {
     end
 
     if OT_HOOKS[ot] then
-      ot, clist = OT_HOOKS[ot](o, ot, tail, lookup_table)
+      ot, clist = OT_HOOKS[ot](o, ot, tail, LOOKUP)
     else
       ot = "Single"
     end
