@@ -10,13 +10,13 @@
 --    MPV_BASHCOMPGEN_MPV_CMD     mpv binary to use. Defaults to 'mpv',
 --                                using the shell's $PATH.
 
+
 local VERBOSE     = not not os.getenv("MPV_BASHCOMPGEN_VERBOSE") or false
 local MPV_CMD     = os.getenv("MPV_BASHCOMPGEN_MPV_CMD") or "mpv"
 local MPV_VERSION = "unknown"
 local LOOKUP      = nil
 
-if _VERSION == "Lua 5.1" then table.unpack = unpack end
-
+local Option_Transformations = require 'mpv_bash_completion.option_transformations'
 -----------------------------------------------------------------------
 -- Shell and stdio ops
 -----------------------------------------------------------------------
@@ -254,122 +254,11 @@ local function getRawVideoMpFormats()
   return clist
 end
 
-local function extractChoices(tail)
-  local sub = tail:match("Choices: ([^()]+)")
-  local clist = {}
-  for c in sub:gmatch("%S+") do
-    table.insert(clist, c)
-  end
-  return clist
-end
-
-local function extractDefault(tail)
-  return tail:match("default: ([^)]+)")
-end
-
-local function extractRange(tail)
-  local a, b = tail:match("%(([%d.-]+) to ([%d.-]+)%)")
-  if a and b then
-    return tostring(a), tostring(b)
-  else
-    return nil
-  end
-end
-
-local function wantsFile(op, tail)
-  local m = tail:match("%[file%]")
-  if m then return true end
-
-  for _,re in ipairs{ "%-file[s]?%-", "^script[s]?", "^scripts%-.*" } do
-    if op:match(re) then return true end
-  end
-
-  return false
-end
-
-local function hasNoCfg(tail)
-  local m = tail:match("%[nocfg%]") -- or tail:match("%[global%]") -- Fuck.
-  return m and true or false
-end
-
 local function parseOpt(t, lu, group, o, tail)
   local ot = tail:match("(%S+)")
   local clist = nil
 
-  -- Overrides for wrongly option type labels
-  -- Usually String: where it should have been Object
-  if oneOf(o, "opengl-backend",
-              "opengl-hwdec-interop",
-              "audio-demuxer",
-              "cscale-window",
-              "demuxer",
-              "dscale",
-              "dscale-window",
-              "scale-window",
-              "sub-demuxer") then
-    ot = "Object"
-  end
-
-  if oneOf(o, "audio-spdif") then
-    ot = "ExpandableChoice"
-  end
-
-  -- Override for dynamic profile list expansion
-  if o:match("^profile") or o == "show-profile" then
-    ot = "Profile"
-  end
-
-  -- Override for dynamic DRM connector list expansion
-  if oneOf(o, "drm-connector") then
-    ot = "DRMConnector"
-  end
-
-  -- Override for codec/format listings which are of type String, not
-  -- object
-  if oneOf(o, "ad", "vd", "oac", "ovc") then
-    ot = "Object"
-  end
-
-  if oneOf(ot, "Integer", "Double", "Float", "Integer64")
-                            then clist = { extractDefault(tail), extractRange(tail) }
-                                 ot = "Numeric"
-  elseif ot == "Flag"       then if hasNoCfg(tail)
-                                    or o:match("^no%-")
-                                    or o:match("^[{}]$") then ot = "Single"
-                                 else clist = { "yes", "no", extractDefault(tail) } end
-  elseif ot == "Audio"      then clist = { extractDefault(tail), extractRange(tail) }
-  elseif ot == "Choices:"   then clist = { extractRange(tail), extractDefault(tail), table.unpack(extractChoices(tail)) }
-                                 ot = "Choice"
-  elseif ot == "ExpandableChoice" then clist = expandChoice(o)
-                                       ot = "Choice"
-  elseif ot == "Color"      then clist = { "#ffffff", "1.0/1.0/1.0/1.0" }
-  elseif ot == "FourCC"     then clist = { "YV12", "UYVY", "YUY2", "I420", "other" }
-  elseif ot == "Image"      then clist = lu.videoFormats
-  elseif ot == "Int[-Int]"  then clist = { "j-k" }
-                                 ot = "Numeric"
-  elseif ot == "Key/value"  then ot = "String"
-  elseif ot == "Object"     then clist = expandObject(o)
-  elseif ot == "Output"     then clist = { "all=no", "all=fatal", "all=error", "all=warn", "all=info", "all=status", "all=v", "all=debug", "all=trace" }
-                                 ot = "String"
-  elseif ot == "Relative"   then clist = { "-60", "60", "50%" }
-                                 ot = "Position"
-  elseif ot == "String"     then if wantsFile(o, tail) then
-                                   ot = "File"
-                                   if o:match('directory') or o:match('dir') then
-                                     ot = "Directory"
-                                   end
-                                 else
-                                   clist = { extractDefault(tail) }
-                                 end
-  elseif ot == "Time"       then clist = { "00:00:00" }
-  elseif ot == "Window"     then ot = "Dimen"
-  elseif ot == "Profile"    then clist = {}
-  elseif ot == "DRMConnector" then clist = {}
-  elseif ot == "alias"      then clist = { tail:match("^alias for (%S+)") or "" }
-                                 ot = "Alias"
-  else
-    ot = "Single"
-  end
+  ot, clist = Option_Transformations.transform(o, ot, tail, LOOKUP)
 
   local oo = Option(clist)
   log(" + %s :: %s -> [%s]", o, ot, oo.clist and table.concat(oo.clist, " ") or "")
@@ -736,6 +625,7 @@ end
 local function main()
   MPV_VERSION = getMpvVersion()
   LOOKUP = { videoFormats = getRawVideoMpFormats() }
+
   local l = optionList()
   debug_categories(l)
   print(createScript(l))
