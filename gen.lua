@@ -494,6 +494,8 @@ local function createScript(olist)
 
   emit([[### LOOKUP TABLES AND CACHES ###
 declare _mpv_xrandr_cache
+declare _mpv_use_media_globexpr=0
+declare _mpv_media_globexpr='@(mp?(e)g|MP?(E)G|wm[av]|WM[AV]|avi|AVI|asf|ASF|vob|VOB|bin|BIN|dat|DAT|vcd|VCD|ps|PS|pes|PES|fl[iv]|FL[IV]|fxm|FXM|viv|VIV|rm?(j)|RM?(J)|ra?(m)|RA?(M)|yuv|YUV|mov|MOV|qt|QT|mp[234]|MP[234]|m4[av]|M4[AV]|og[gmavx]|OG[GMAVX]|w?(a)v|W?(A)V|dump|DUMP|mk[av]|MK[AV]|m4a|M4A|aac|AAC|m[24]v|M[24]V|dv|DV|rmvb|RMVB|mid|MID|t[ps]|T[PS]|3g[p2]|3gpp?(2)|mpc|MPC|flac|FLAC|vro|VRO|divx|DIVX|aif?(f)|AIF?(F)|m2t?(s)|M2T?(S)|vdr|VDR|xvid|XVID|ape|APE|gif|GIF|nut|NUT|bik|BIK|webm|WEBM|amr|AMR|awb|AWB|iso|ISO|opus|OPUS)?(.part)'
 declare -A _mpv_fargs
 declare -A _mpv_pargs]])
   local fargs = getmetatable(olist).fargs
@@ -723,7 +725,13 @@ _mpv(){
     table.concat(all, " ")))
   emit("fi")
 
-  emit("_filedir")
+  emit([=[
+if [[ $_mpv_use_media_globexpr -eq 1  && -n "$_mpv_media_globexpr" ]] ; then
+  _filedir "$_mpv_media_globexpr"
+else
+  _filedir
+fi
+]=])
 
   emit("}", "complete -o nospace -F _mpv "..basename(MPV_CMD))
   return table.concat(lines, "\n")

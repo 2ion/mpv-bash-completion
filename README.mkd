@@ -68,7 +68,7 @@ historic version of mpv-bash-completion.
 * xrandr: for dynamic resolution detection and completion under X11
   and xwayland
 
-### Supporting inputrc configuration
+## Supporting inputrc configuration
 
 We recommend the following setting for snappier and more luxurious
 completion experience: To the file `~/.inputrc`, add the lines
@@ -81,6 +81,31 @@ set visible-stats On
 ```
 Launch a new shell to use the setting.
 
+## Enable media file filtering
+
+By default, when you tab-complete an input media file, the completion
+does not filter media file arguments by extension. You may optionally
+enable filtering and override the default filter glob expression.
+
+You may set the following shell variables to control this functionality
+(for example, in ~/.bashrc or ~/.bash_profile). It doesn't matter if the
+variables are set before or after the Bash completion code is loaded.
+
+```bash
+# Enable filtering.
+_mpv_use_media_globexpr=1
+
+# Override the default media glob expression.
+# Display the default value using `echo $_mpv_media_globexpr`.
+_mpv_media_globexpr='@(mkv)'
+```
+
+You should have extglob enabled for the default filter to work
+correctly (e.g. in ~/.bashrc):
+
+```
+shopt -s extglob
+```
 ## Installation
 
 You can just generate the completion script or build a package for one
@@ -88,7 +113,7 @@ of the supported platforms.
 
 ### Platform-agnostic method
 
-```sh
+```bash
 # You may set the following environment variables beforehand:
 # export MPV_BASHCOMPGEN_VERBOSE=1 # verbose debug/progress output
 # export MPV_BASHCOMPGEN_MPV_CMD=mpv # path or command to execute mpv, defaults to 'mpv'
