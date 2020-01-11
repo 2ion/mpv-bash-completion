@@ -187,7 +187,7 @@ local function getMpvVersion()
 end
 
 local function expandObject(o)
-  local h = mpv(string.format("--%s help", o))
+  local h = mpv(string.format("--%s=help", o))
   local clist = {}
 
   local function lineFilter(line)
@@ -227,7 +227,7 @@ local function split(s, delim)
 end
 
 local function expandChoice(o)
-  local h = mpv(string.format("--%s help", o))
+  local h = mpv(string.format("--%s=help", o))
   local clist = {}
   for l in h:lines() do
     local m = l:match("^Choices: ([%S,.-]+)")

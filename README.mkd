@@ -1,6 +1,6 @@
 # mpv-bash-completion
 
-Latest release: **[3.3.17](https://github.com/2ion/mpv-bash-completion/releases/tag/3.3.17)**
+Latest release: **[3.3.18](https://github.com/2ion/mpv-bash-completion/releases/tag/3.3.18)**
 
 [![AUR package](https://repology.org/badge/version-for-repo/aur/mpv-bash-completion.svg)](https://repology.org/metapackage/mpv-bash-completion)
 [![Gentoo package](https://repology.org/badge/version-for-repo/gentoo/mpv-bash-completion.svg)](https://repology.org/metapackage/mpv-bash-completion)
