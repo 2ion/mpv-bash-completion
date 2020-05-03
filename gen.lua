@@ -169,11 +169,14 @@ local function normalize_nums(xs)
 end
 
 local Option = setmetatable({}, {
-  __call = function (t, clist)
+  __call = function (t, otype, clist)
     local o = {}
+    o.type = otype
     if type(clist)=="table" and #clist > 0 then
       o.clist = unique(clist)
       o.clist = normalize_nums(o.clist)
+    else
+      o.clist = {}
     end
     return setmetatable(o, { __index = t })
   end
@@ -371,7 +374,7 @@ local function parseOpt(t, lu, group, o, tail)
     ot = "Single"
   end
 
-  local oo = Option(clist)
+  local oo = Option(ot, clist)
   log(" + %s :: %s -> [%s]", o, ot, oo.clist and table.concat(oo.clist, " ") or "")
 
   if group then
@@ -552,92 +555,92 @@ _mpv_s(){
   COMPREPLY=($(compgen -W "$cmp" -- "$cur"))
 }
 _mpv_objarg(){
-  local prev=${1#--} p=$2 r s t k f
+  local object=$1
+  local cur=$2 # --object=[...,]filter1:param1=
   shift 2
-  # Parameter arguments I:
-  # All available parameters
-  if [[ $p =~ : && $p =~ =$ ]]; then
-    # current filter
-    s=${p##*,}
-    s=${s%%:*}
-    # current parameter
-    t=${p%=}
-    t=${t##*:}
-    # index key
-    k="$prev@$s@$t"
-    if [[ ${_mpv_pargs[$k]+x} ]]; then
-      for q in ${_mpv_pargs[$k]}; do
-        r="${r}${p}${q} "
+
+  local stripped_cur=${cur#=}
+  local current_filter
+  local current_filter_param
+  local current_filter_param_value
+  local key
+  local response
+  local slug
+
+  #
+  # case: --object=[filter:param=]...,filter:param=
+  #
+  if [[ $stripped_cur =~ : && $stripped_cur =~ =$ ]]; then
+    current_filter=${stripped_cur##*,}
+    current_filter=${current_filter%%:*}
+    current_filter_param=${stripped_cur%=}
+    current_filter_param=${current_filter_param##*:}
+    key="${object}@${current_filter}@${current_filter_param}"
+    if [[ ${_mpv_pargs[$key]+x} ]]; then
+      for slug in ${_mpv_pargs[$key]}; do
+        response="${response}${cur}${slug} "
       done
     fi
-
-  # Parameter arguments II:
-  # Fragment completion
-  elif [[ ${p##*,} =~ : && ${p##*:} =~ = ]]; then
-    # current filter
-    s=${p##*,}
-    s=${s%%:*}
-    # current parameter
-    t=${p%=}
-    t=${t##*:}
-    t=${t%%=*}
-    # index key
-    k="$prev@$s@$t"
-    # fragment
-    f=${p##*=}
-    if [[ ${_mpv_pargs[$k]+x} ]]; then
-      for q in ${_mpv_pargs[$k]}; do
-        if [[ $q =~ ^${f} ]]; then
-          r="${r}${p%=*}=${q} "
+  #
+  # case: --object=[filter:param=]...,filter:param=ab?
+  #
+  elif [[ ${stripped_cur##*,} =~ : && ${stripped_cur##*:} =~ = ]]; then
+    current_filter=${stripped_cur##*,}
+    current_filter=${current_filter%%:*}
+    current_filter_param=${stripped_cur%=}
+    current_filter_param=${current_filter_param##*:}
+    key="${object}@${current_filter}@${current_filter_param}"
+    current_filter_param_value=${stripped_cur##*=}
+    if [[ ${_mpv_pargs[$key]+x} ]]; then
+      for slug in ${_mpv_pargs[$key]}; do
+        if [[ $slug =~ ^${current_filter_param_value} ]]; then
+          response="${response}${cur%=*}=${slug} "
         fi
       done
     fi
-
-  # Filter parameters I:
-  # Suggest all available parameters
-  elif [[ $p =~ :$ ]]; then
-    # current filter
-    s=${p##*,}
-    s=${s%%:*}
-    # index key
-    k="$prev@$s"
-    for q in ${_mpv_fargs[$k]}; do
-      r="${r}${p}${q} "
+  #
+  # case: --object=[...,]filter:?
+  #
+  elif [[ $stripped_cur =~ :$ ]]; then
+    current_filter=${stripped_cur##*,}
+    current_filter=${current_filter%%:*}
+    key="${object}@${current_filter}"
+    for slug in ${_mpv_fargs[$key]}; do
+      response="${response}${cur}${slug} "
     done
-
-  # Filter parameters II:
-  # Complete fragment
-  elif [[ ${p##*,} =~ : ]]; then
-    s=${p##*,}
-    s=${s%%:*}
-    # current argument
-    t=${p##*:}
-    # index key
-    k="$prev@$s"
-    for q in ${_mpv_fargs[$k]}; do
-      if [[ $q =~ ^${t} ]]; then
-        r="${r}${p%:*}:${q} "
+  #
+  # case: --object=[...,]filter:ab?
+  #
+  elif [[ ${stripped_cur##*,} =~ : ]]; then
+    current_filter=${stripped_cur##*,}
+    current_filter=${current_filter:*}
+    current_filter_param=${stripped_cur##*:} # is a fragment
+    key="${object}@${current_filter}"
+    for slug in ${_mpv_fargs[$key]}; do
+      if [[ $slug =~ ^${current_filter_param} ]]; then
+        response="${reponse}${cur%:*}:${slug} "
       fi
     done
-
-  # Filter list I:
-  # All available filters
-  elif [[ $p =~ ,$ ]]; then
-    for q in "$@"; do
-      r="${r}${p}${q} "
+  #
+  # case: --object=filter,
+  #
+  elif [[ $stripped_cur =~ ,$ ]]; then
+    for slug in "$@"; do
+      response="${response}${cur}${slug} "
     done
-
-  # Filter list II:
-  # Complete fragment
   else
+  #
+  # case: --object=fil???
+  #
     s=${p##*,}
-    for q in "$@"; do
-      if [[ $q =~ ^${s} ]]; then
-        r="${r}${p%,*},${q} "
+    current_filter=${stripped_cur##*,}
+    for slug in "$@"; do
+      if [[ $slug =~ ^${current_filter} ]]; then
+        response="${response}${cur%,*}${slug} "
       fi
     done
   fi
-  printf "${r% }"
+ printf "${response% }"
 }]=])
 
   emit([=[### COMPLETION ###
@@ -657,18 +660,34 @@ _mpv(){
   })
 
   emit([=[if [[ -n $cur ]]; then case "$cur" in]=])
-  for o,p in ofType("Choice", "Flag") do
-    emit(string.format([[--%s=*)_mpv_s '%s' "$cur"; return;;]],
-        o, mapcats(p.clist, function (e) return string.format("--%s=%s", o, e) end)))
+  for o,p in ofType("Choice",
+                    "Flag",
+                    "Object",
+                    "Numeric",
+                    "Audio",
+                    "Color",
+                    "FourCC",
+                    "Image",
+                    "String",
+                    "Position",
+                    "Time",
+                    "Profile",
+                    "DRMConnector",
+                    "Dimen",
+                    "Directory") do
+    if p.type == "Object" and o:match("^[av][fo]") then
+    else
+      emit(string.format([[--%s=*)_mpv_s '%s' "$cur"; return;;]],
+          o, mapcats(p.clist, function (e) return string.format("--%s=%s", o, e) end)))
     table.insert(all, string.format("--%s=", o))
   end
   emit("esac; fi")
 
-  emit([=[if [[ -n $prev && ( $cur =~ , || $cur =~ : ) ]]; then case "$prev" in]=])
+  emit([=[if [[ -n $cur && ( $cur =~ , || $cur =~ :$ ) ]]; then case "$cur" in]=])
   for o,p in ofType("Object") do
     if o:match("^[av][fo]") then
-      emit(string.format([[--%s)_mpv_s "$(_mpv_objarg "$prev" "$cur" %s)" "$cur";return;;]],
-        o, p.clist and table.concat(p.clist, " ") or ""))
+      emit(string.format([[--%s=*)_mpv_s "$(_mpv_objarg %s "$cur" %s)" "$cur";return;;]],
+        o, o, p.clist and table.concat(p.clist, " ") or ""))
     end
   end
   emit("esac; fi")
@@ -677,45 +696,40 @@ _mpv(){
   if olist.File then
     emit(string.format("%s)_filedir;return;;",
       mapcator(keys(olist.File), function (e)
-        local o = string.format("--%s", e)
-        table.insert(all, o)
+        local o = string.format("--%s=*", e)
+        table.insert(all, string.format("--%s=", o))
         return o
       end)))
   end
+
   if olist.Profile then
     emit(string.format([[%s)_mpv_s "$(_mpv_profiles)" "$cur";return;;]],
       mapcator(keys(olist.Profile), function (e)
-        local o = string.format("--%s", e)
-        table.insert(all, o)
+        local o = string.format("--%s=*", e)
+        table.insert(all, string.format("--%s=", o))
         return o
       end)))
   end
+
   if olist.DRMConnector then
     emit(string.format([[%s)_mpv_s "$(_mpv_drm_connectors)" "$cur";return;;]],
       mapcator(keys(olist.DRMConnector), function (e)
-            local o = string.format("--%s", e)
-            table.insert(all, o)
+            local o = string.format("--%s=*", e)
+            table.insert(all, string.format("--%s=", o))
             return o
     end)))
   end
   if olist.Directory then
     emit(string.format("%s)_filedir -d;return;;",
       mapcator(keys(olist.Directory), function (e)
-        local o = string.format("--%s", e)
-        table.insert(all, o)
+        local o = string.format("--%s=*", e)
+        table.insert(all, string.format("--%s=", o))
         return o
       end)))
   end
-  for o, p in ofType("Object", "Numeric", "Audio", "Color", "FourCC", "Image",
-    "String", "Position", "Time") do
-    if p.clist then table.sort(p.clist) end
-    emit(string.format([[--%s)_mpv_s '%s' "$cur"; return;;]],
-      o, p.clist and table.concat(p.clist, " ") or ""))
-    all(o)
-  end
   for o,p in ofType("Dimen") do
-    emit(string.format([[--%s)_mpv_s "$(_mpv_xrandr)" "$cur";return;;]], o))
-    all(o)
+    emit(string.format([[--%s=*)_mpv_s "$(_mpv_xrandr)" "$cur";return;;]], o))
+    table.insert(all, string.format("--%s=", o))
   end
   emit("esac; fi")
 
